@@ -24,6 +24,11 @@
 		3CBF1F041BB0A7D60028625A /* pngwutil.c in Sources */ = {isa = PBXBuildFile; fileRef = 3CBF1EF31BB0A7D60028625A /* pngwutil.c */; };
 		3CBF1F071BB0A8B20028625A /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3CBF1F061BB0A8B20028625A /* main.cpp */; };
 		3CBF1F091BB0A90E0028625A /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3CBF1F081BB0A90E0028625A /* libz.dylib */; };
+		3CBF1F121BB0ADA10028625A /* DivQuantCluster.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3CBF1F0B1BB0ADA10028625A /* DivQuantCluster.cpp */; };
+		3CBF1F131BB0ADA10028625A /* DivQuantMapColors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3CBF1F0D1BB0ADA10028625A /* DivQuantMapColors.cpp */; };
+		3CBF1F141BB0ADA10028625A /* DivQuantMisc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3CBF1F0E1BB0ADA10028625A /* DivQuantMisc.cpp */; };
+		3CBF1F151BB0ADA10028625A /* DivQuantUni.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3CBF1F0F1BB0ADA10028625A /* DivQuantUni.cpp */; };
+		3CBF1F161BB0ADA10028625A /* quant_util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3CBF1F101BB0ADA10028625A /* quant_util.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -66,6 +71,14 @@
 		3CBF1EF51BB0A7D60028625A /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		3CBF1F061BB0A8B20028625A /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		3CBF1F081BB0A90E0028625A /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
+		3CBF1F0B1BB0ADA10028625A /* DivQuantCluster.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DivQuantCluster.cpp; sourceTree = "<group>"; };
+		3CBF1F0C1BB0ADA10028625A /* DivQuantHeader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DivQuantHeader.h; sourceTree = "<group>"; };
+		3CBF1F0D1BB0ADA10028625A /* DivQuantMapColors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DivQuantMapColors.cpp; sourceTree = "<group>"; };
+		3CBF1F0E1BB0ADA10028625A /* DivQuantMisc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DivQuantMisc.cpp; sourceTree = "<group>"; };
+		3CBF1F0F1BB0ADA10028625A /* DivQuantUni.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DivQuantUni.cpp; sourceTree = "<group>"; };
+		3CBF1F101BB0ADA10028625A /* quant_util.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = quant_util.cpp; sourceTree = "<group>"; };
+		3CBF1F111BB0ADA10028625A /* quant_util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = quant_util.h; sourceTree = "<group>"; };
+		3CBF1F171BB0B2710028625A /* CalcError.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CalcError.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -85,8 +98,10 @@
 			children = (
 				3CBF1F081BB0A90E0028625A /* libz.dylib */,
 				3CBF1EF51BB0A7D60028625A /* README.md */,
-				3CBF1EF41BB0A7D60028625A /* PngContext.h */,
 				3CBF1F061BB0A8B20028625A /* main.cpp */,
+				3CBF1EF41BB0A7D60028625A /* PngContext.h */,
+				3CBF1F171BB0B2710028625A /* CalcError.h */,
+				3CBF1F0A1BB0ADA10028625A /* DivQuant */,
 				3CBF1EDD1BB0A7D60028625A /* libpng */,
 				3CBF1ED41BB0A6AC0028625A /* Products */,
 			);
@@ -127,6 +142,20 @@
 				3CBF1EF31BB0A7D60028625A /* pngwutil.c */,
 			);
 			path = libpng;
+			sourceTree = "<group>";
+		};
+		3CBF1F0A1BB0ADA10028625A /* DivQuant */ = {
+			isa = PBXGroup;
+			children = (
+				3CBF1F111BB0ADA10028625A /* quant_util.h */,
+				3CBF1F101BB0ADA10028625A /* quant_util.cpp */,
+				3CBF1F0B1BB0ADA10028625A /* DivQuantCluster.cpp */,
+				3CBF1F0C1BB0ADA10028625A /* DivQuantHeader.h */,
+				3CBF1F0D1BB0ADA10028625A /* DivQuantMapColors.cpp */,
+				3CBF1F0E1BB0ADA10028625A /* DivQuantMisc.cpp */,
+				3CBF1F0F1BB0ADA10028625A /* DivQuantUni.cpp */,
+			);
+			path = DivQuant;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -185,6 +214,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3CBF1F121BB0ADA10028625A /* DivQuantCluster.cpp in Sources */,
+				3CBF1F141BB0ADA10028625A /* DivQuantMisc.cpp in Sources */,
 				3CBF1F001BB0A7D60028625A /* pngtrans.c in Sources */,
 				3CBF1F021BB0A7D60028625A /* pngwrite.c in Sources */,
 				3CBF1F031BB0A7D60028625A /* pngwtran.c in Sources */,
@@ -194,12 +225,15 @@
 				3CBF1EFC1BB0A7D60028625A /* pngrio.c in Sources */,
 				3CBF1EF61BB0A7D60028625A /* png.c in Sources */,
 				3CBF1F011BB0A7D60028625A /* pngwio.c in Sources */,
+				3CBF1F161BB0ADA10028625A /* quant_util.cpp in Sources */,
 				3CBF1EFF1BB0A7D60028625A /* pngset.c in Sources */,
+				3CBF1F151BB0ADA10028625A /* DivQuantUni.cpp in Sources */,
 				3CBF1EFA1BB0A7D60028625A /* pngpread.c in Sources */,
 				3CBF1EF81BB0A7D60028625A /* pngget.c in Sources */,
 				3CBF1EFB1BB0A7D60028625A /* pngread.c in Sources */,
 				3CBF1EFE1BB0A7D60028625A /* pngrutil.c in Sources */,
 				3CBF1F041BB0A7D60028625A /* pngwutil.c in Sources */,
+				3CBF1F131BB0ADA10028625A /* DivQuantMapColors.cpp in Sources */,
 				3CBF1EFD1BB0A7D60028625A /* pngrtran.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

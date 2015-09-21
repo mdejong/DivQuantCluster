@@ -380,3 +380,9 @@ void write_png_file(char* file_name, PngContext *cxt)
   
   fclose(fp);
 }
+
+void PngContext_dealloc(PngContext *cxt)
+{
+  free_row_pointers(cxt);
+  free(cxt->pixels);
+}
