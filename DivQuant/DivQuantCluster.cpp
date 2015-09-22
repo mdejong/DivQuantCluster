@@ -13,6 +13,8 @@
  
  */
 
+// M. E. Celebi, Q. Wen, S. Hwang, An Effective Real-Time Color Quantization Method Based on Divisive Hierarchical Clustering, Journal of Real-Time Image Processing, 10(2): 329-344, 2015
+
 #include "DivQuantHeader.h"
 
 #include <vector>
