@@ -228,7 +228,7 @@ DivQuantCluster<UW, MT>::cluster()
   Pixel_Double *new_mean; /* componentwise mean of C2 */
   Pixel_Double *old_var; /* componentwise variance of C1 */
   Pixel_Double *new_var; /* componentwise variance of C2 */
-  Pixel_Double *rhs;
+
   // Capacity in num points that can be stored in tmp_data
   uint32_t *tmp_data; /* temporary data set (holds the cluster to be split) */
   int tmp_buffer_used;
@@ -351,13 +351,6 @@ DivQuantCluster<UW, MT>::cluster()
   
   memset(total_mean, 0, sizeof(Pixel_Double));
   memset(total_var, 0, sizeof(Pixel_Double));
-  
-  if ( apply_lkm )
-  {
-    rhs = new Pixel_Double();
-  } else {
-    rhs = nullptr;
-  }
   
   /* Cluster 0 is always the first cluster to be split */
   old_index = 0;
@@ -580,6 +573,12 @@ DivQuantCluster<UW, MT>::cluster()
       new_mean->blue *= data_weight;
       
       new_weight = new_weight_count * data_weight;
+      
+      if ( !apply_lkm ) {
+        new_var->red *= data_weight;
+        new_var->green *= data_weight;
+        new_var->blue *= data_weight;
+      }
     }
     
     // Calculate the weight of the old cluster
@@ -622,17 +621,17 @@ DivQuantCluster<UW, MT>::cluster()
     
     for ( it = 0; it < max_iters; it++ )
     {
-      /* Precalculations */
+      // Precalculations
       lhs = 0.5 *
       ( SQR ( old_mean->red ) - SQR ( new_mean->red ) +
        SQR ( old_mean->green ) - SQR ( new_mean->green ) +
        SQR ( old_mean->blue ) - SQR ( new_mean->blue ) );
       
-      rhs->red = old_mean->red - new_mean->red;
-      rhs->green = old_mean->green - new_mean->green;
-      rhs->blue = old_mean->blue - new_mean->blue;
+      double rhs_red = old_mean->red - new_mean->red;
+      double rhs_green = old_mean->green - new_mean->green;
+      double rhs_blue = old_mean->blue - new_mean->blue;
       
-      /* Reset the statistics of the new cluster */
+      // Reset the statistics of the new cluster
       new_weight = 0.0;
       new_size = 0;
       RESET_PIXEL ( new_mean );
@@ -657,25 +656,26 @@ DivQuantCluster<UW, MT>::cluster()
         green = G;
         blue = B;
         
-#ifdef VERBOSE
         int pointindex = ip;
         if (point_index) {
           pointindex = point_index[ip];
         }
 #if defined(DEBUG)
+        assert(pointindex >= 0 && pointindex < num_points);
         assert(pointindex >= 0 && pointindex < member_size);
 #endif // DEBUG
         if (UW) {
+#ifdef VERBOSE
           tmp_weight = data_weight;
+#endif // VERBOSE
         } else {
           tmp_weight = weightsPtr[pointindex];
         }
-#endif
         
-        if ( lhs < ( rhs->red * red + rhs->green * green + rhs->blue * blue ) )
+        if ( lhs < ( (rhs_red * red) + (rhs_green * green) + (rhs_blue * blue) ) )
         {
 #ifdef VERBOSE
-          /* Update the MSE of the old cluster */
+          // Update the MSE of the old cluster
           mse += tmp_weight *
           ( SQR ( red - old_mean->red ) +
            SQR ( green - old_mean->green ) +
@@ -684,14 +684,7 @@ DivQuantCluster<UW, MT>::cluster()
           
           if ( it == max_iters_m1 )
           {
-            /* Save the membership of the point */
-            int pointindex = ip;
-            if (point_index) {
-              pointindex = point_index[ip];
-            }
-#if defined(DEBUG)
-            assert(pointindex >= 0 && pointindex < member_size);
-#endif // DEBUG
+            // Save the membership of the point
             member[pointindex] = old_index;
 #ifdef VERBOSE
             fprintf(stdout, "write member[%d] = %d (ip = %d)\n", pointindex, member[pointindex], ip);
@@ -701,77 +694,67 @@ DivQuantCluster<UW, MT>::cluster()
         else
         {
 #ifdef VERBOSE
-          /* Update the MSE of the new cluster */
+          // Update the MSE of the new cluster
           mse += tmp_weight *
-          ( SQR ( red - old_mean->red + rhs->red ) +
-           SQR ( green - old_mean->green + rhs->green ) +
-           SQR ( blue - old_mean->blue + rhs->blue ) );
-#else
-          int pointindex = ip;
-          if (point_index) {
-            pointindex = point_index[ip];
-          }
-#if defined(DEBUG)
-          assert(pointindex >= 0 && pointindex < member_size);
-#endif // DEBUG
-          if (UW) {
-            tmp_weight = data_weight;
-          } else {
-            tmp_weight = weightsPtr[pointindex];
-          }
+          ( SQR ( red - old_mean->red + rhs_red ) +
+           SQR ( green - old_mean->green + rhs_green ) +
+           SQR ( blue - old_mean->blue + rhs_blue ) );
 #endif
-          
           
           if ( it != max_iters_m1 )
           {
-            /* Update only mean */
-            new_mean->red += tmp_weight * red;
-            new_mean->green += tmp_weight * green;
-            new_mean->blue += tmp_weight * blue;
+            // Update only mean
             
-#ifdef VERBOSE
-            if ((1)) {
-              printf ( "Update mean (1) : tmp weight %0.8f : ( R G B ) %0.2f %0.2f %0.2f\n", tmp_weight, red, green, blue);
+            if (UW) {
+              new_mean->red += red;
+              new_mean->green += green;
+              new_mean->blue += blue;
+            } else {
+              new_mean->red += tmp_weight * red;
+              new_mean->green += tmp_weight * green;
+              new_mean->blue += tmp_weight * blue;
             }
-#endif
           }
           else
           {
+            // Update mean and variance
             
-            /* Update mean and variance */
-            new_mean->red += tmp_weight * red;
-            new_mean->green += tmp_weight * green;
-            new_mean->blue += tmp_weight * blue;
-            
-            new_var->red += tmp_weight * SQR ( red );
-            new_var->green += tmp_weight * SQR ( green );
-            new_var->blue += tmp_weight * SQR ( blue );
-            
-#ifdef VERBOSE
-            if ((1)) {
-              printf ( "Update mean (2) : tmp weight %0.8f : ( R G B ) %0.2f %0.2f %0.2f\n", tmp_weight, red, green, blue);
+            if (UW) {
+              new_mean->red += red;
+              new_mean->green += green;
+              new_mean->blue += blue;
+            } else {
+              new_mean->red += tmp_weight * red;
+              new_mean->green += tmp_weight * green;
+              new_mean->blue += tmp_weight * blue;
             }
-#endif
-            
-            /* Save the membership of the point */
-            int pointindex = ip;
-            if (point_index) {
-              pointindex = point_index[ip];
+
+            if (UW) {
+              new_var->red += ( R * R );
+              new_var->green += ( G * G );
+              new_var->blue += ( B * B );
+            } else {
+              new_var->red += tmp_weight * ( R * R );
+              new_var->green += tmp_weight * ( G * G );
+              new_var->blue += tmp_weight * ( B * B );
             }
-#if defined(DEBUG)
-            assert(pointindex >= 0 && pointindex < member_size);
-#endif // DEBUG
+            
+            // Save the membership of the point
             member[pointindex] = new_index;
 #ifdef VERBOSE
             fprintf(stdout, "write member[%d] = %d (ip = %d)\n", pointindex, member[pointindex], ip);
 #endif
           }
           
-          /* Update the weight/size of the new cluster */
-          new_weight += tmp_weight;
+          // Update the weight/size of the new cluster
+          
+          if (UW) {
+          } else {
+            new_weight += tmp_weight;
+          }
           new_size++;
         }
-      }
+      } // end foreach tmp_num_points
       
 #ifdef VERBOSE
       printf ( "\tLocal Iteration %d: MSE = %f\n", it, mse );
@@ -781,15 +764,27 @@ DivQuantCluster<UW, MT>::cluster()
       }
 #endif
       
-      /* Calculate the mean of the new cluster */
+      if (UW) {
+        new_mean->red *= data_weight;
+        new_mean->green *= data_weight;
+        new_mean->blue *= data_weight;
+        
+        new_weight = new_size * data_weight;
+        
+        new_var->red *= data_weight;
+        new_var->green *= data_weight;
+        new_var->blue *= data_weight;
+      }
+      
+      // Calculate the mean of the new cluster
       new_mean->red /= new_weight;
       new_mean->green /= new_weight;
       new_mean->blue /= new_weight;
       
-      /* Calculate the weight of the old cluster */
+      // Calculate the weight of the old cluster
       old_weight = total_weight - new_weight;
       
-      /* Calculate the mean of the old cluster using the 'combined mean' formula */
+      // Calculate the mean of the old cluster using the 'combined mean' formula
       old_mean->red = ( total_weight * total_mean->red - new_weight * new_mean->red ) / old_weight;
       old_mean->green = ( total_weight * total_mean->green - new_weight * new_mean->green ) / old_weight;
       old_mean->blue = ( total_weight * total_mean->blue - new_weight * new_mean->blue ) / old_weight;
@@ -1073,11 +1068,6 @@ DivQuantCluster<UW, MT>::cluster()
   delete [] tse;
   delete [] mean;
   delete [] var;
-  
-  if ( apply_lkm )
-  {
-    delete rhs;
-  }
   
   this->numClusters = num_colors - num_empty;
   assert(this->numClusters == (uint32_t)colortable.size());
