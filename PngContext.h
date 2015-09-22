@@ -29,6 +29,7 @@ typedef struct {
   int width, height;
   png_byte color_type;
   png_byte bit_depth;
+  int hasAlpha;
   
   png_structp png_ptr;
   png_infop info_ptr;
@@ -43,16 +44,18 @@ void PngContext_init(PngContext *cxt) {
   cxt->row_pointers = NULL;
 }
 
-// Copy setting from one PNG context to another. Note that this
-// only makes a copy of the settings and not the actual pixels.
-// Note that the width and height will have to be explicitly set.
+// Define settings on toCxt based on the settings from fromCxt.
+// Note that this logic only makes it possible to write 8 bit
+// images that are BGR or BGRA pixels.
 
 void PngContext_copy_settngs(PngContext *toCxt, PngContext *fromCxt) {
-  toCxt->color_type = fromCxt->color_type;
-  toCxt->bit_depth = fromCxt->bit_depth;
-  toCxt->png_ptr = fromCxt->png_ptr;
-  toCxt->info_ptr = fromCxt->info_ptr;
-  toCxt->number_of_passes = fromCxt->number_of_passes;
+  if (fromCxt->hasAlpha) {
+    toCxt->color_type = PNG_COLOR_TYPE_RGBA;
+  } else {
+    toCxt->color_type = PNG_COLOR_TYPE_RGB;
+  }
+  toCxt->bit_depth = 8;
+  toCxt->number_of_passes = 1;
 }
 
 void PngContext_alloc_pixels(PngContext *cxt, int width, int height) {
@@ -151,56 +154,54 @@ void read_png_file(char* file_name, PngContext *cxt)
   cxt->bit_depth = png_get_bit_depth(cxt->png_ptr, cxt->info_ptr);
   
   cxt->number_of_passes = png_set_interlace_handling(cxt->png_ptr);
-  png_read_update_info(cxt->png_ptr, cxt->info_ptr);
-  
-  if (cxt->bit_depth != 8) {
-    abort_("[read_png_file] only 8 bit pixel depth PNG is supported");
+
+  if (cxt->bit_depth > 8) {
+    abort_("[read_png_file] PNG with bit depth larger than 8 not supported");
   }
   
   /* read file */
   if (setjmp(png_jmpbuf(cxt->png_ptr)))
     abort_("[read_png_file] Error during read_image");
   
-  allocate_row_pointers(cxt);
-  
-  png_read_image(cxt->png_ptr, cxt->row_pointers);
-  
-  int pixeli = 0;
-  
   int isBGRA = 0;
-  int isGrayscale = 0;
   
   png_byte ctByte = png_get_color_type(cxt->png_ptr, cxt->info_ptr);
-  
-  if (ctByte == PNG_COLOR_TYPE_RGBA) {
-    isBGRA = 1;
-  } else if (ctByte == PNG_COLOR_TYPE_RGB) {
-    isBGRA = 0;
-  } else if (ctByte == PNG_COLOR_TYPE_GRAY) {
-    isGrayscale = 1;
-  } else {
-    abort_("[read_png_file] unsupported input format type");
+    
+  if (ctByte == PNG_COLOR_TYPE_PALETTE) {
+    png_set_palette_to_rgb(cxt->png_ptr);
+    
+    if (cxt->bit_depth < 8) {
+      png_set_packing(cxt->png_ptr);
+    }
   }
+  
+  if (ctByte == PNG_COLOR_TYPE_GRAY && cxt->bit_depth < 8) {
+    png_set_gray_to_rgb(cxt->png_ptr);
+  }
+  
+  if (ctByte & PNG_COLOR_MASK_ALPHA) {
+    isBGRA = 1;
+  } else {
+    isBGRA = 0;
+  }
+  
+  if (png_get_valid(cxt->png_ptr, cxt->info_ptr, PNG_INFO_tRNS)) {
+    png_set_tRNS_to_alpha(cxt->png_ptr);
+    isBGRA = 1;
+  }
+  
+  cxt->hasAlpha = isBGRA;
+  
+  int pixeli = 0;
+
+  allocate_row_pointers(cxt);
+  png_read_update_info(cxt->png_ptr, cxt->info_ptr);
+  png_read_image(cxt->png_ptr, cxt->row_pointers);
   
   for (int y=0; y < cxt->height; y++) {
     png_byte* row = cxt->row_pointers[y];
     
-    if (isGrayscale) {
-      for (int x=0; x < cxt->width; x++) {
-        png_byte* ptr = &(row[x]);
-        
-        uint32_t gray = ptr[0];
-        uint32_t pixel = (0xFF << 24) | (gray << 16) | (gray << 8) | gray;
-        
-        if (debugPrintPixelsReadAndWritten) {
-          fprintf(stdout, "Read pixel 0x%08X at (x,y) (%d, %d)\n", pixel, x, y);
-        }
-        
-        cxt->pixels[pixeli] = pixel;
-        
-        pixeli++;
-      }
-    } else if (isBGRA) {
+    if (isBGRA) {
       for (int x=0; x < cxt->width; x++) {
         png_byte* ptr = &(row[x*4]);
         
@@ -213,6 +214,12 @@ void read_png_file(char* file_name, PngContext *cxt)
         
         if (debugPrintPixelsReadAndWritten) {
           fprintf(stdout, "Read pixel 0x%08X at (x,y) (%d, %d)\n", pixel, x, y);
+        }
+
+        if (debugPrintPixelsReadAndWritten) {
+          if (A != 0 && A != 0xFF) {
+            fprintf(stdout, "Read non opaque pixel 0x%08X at (x,y) (%d, %d)\n", pixel, x, y);
+          }
         }
         
         cxt->pixels[pixeli] = pixel;

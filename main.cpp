@@ -282,6 +282,9 @@ void process_file(PngContext *cxt)
     }
   }
   
+  // Deallocate allSortedUniquePixels since the input buffer can be quite large
+  allSortedUniquePixels = vector<uint32_t>();
+  
   // Note that this method writes numClusters with a possibly smaller N in the case
   // where not enough points exist to split into N clusters.
   
@@ -298,8 +301,6 @@ void process_file(PngContext *cxt)
     
     fprintf(stdout, "combined MSE %0.8f\n", cMSE);
   }
-  
-  int clusteri = 0;
   
   // Resort cluster in terms of shortest distance from one cluster center to the next
   // to implement a cluster sort order.
@@ -384,6 +385,19 @@ void process_file(PngContext *cxt)
     if ((0)) {
       fprintf(stdout, "orig -> offset -> quant : 0x%08X -> %3d -> 0x%08X\n", origPixel, offset, quantPixel);
     }
+
+    // Copy the alpha channel from the unique input pixel to the quant output pixel
+    
+//    if ((1) && ((origPixel >> 24) != 0 && (origPixel >> 24) != 0xFF)) {
+//      fprintf(stdout, "orig -> offset -> quant : 0x%08X -> %3d -> 0x%08X\n", origPixel, offset, quantPixel);
+//    }
+    
+    quantPixel &= 0x00FFFFFF;
+    quantPixel |= (origPixel & 0xFF000000);
+
+//    if ((1) && ((origPixel >> 24) != 0 && (origPixel >> 24) != 0xFF)) {
+//      fprintf(stdout, "orig -> offset -> quant : 0x%08X -> %3d -> 0x%08X\n", origPixel, offset, quantPixel);
+//    }
     
     inPixelToQuantPixel[origPixel] = quantPixel;
   }
@@ -565,6 +579,41 @@ void process_file(PngContext *cxt)
   
   PngContext_dealloc(&cxt3);
   
+  // Finally, generate a version of the original image where each original pixel is replaced
+  // by the cluster center the is closest to the pixel. Note that only fully opaque images
+  // can be processed in this way to output only pixels with N clusters. Images with partially
+  // opaque pixels retain the original partial alpha value from the input pixels so the output
+  // number of pixels could be larger than the number of clusters in that case.
+  
+  if ((1)) {
+    PngContext quantCxt;
+    PngContext_init(&quantCxt);
+    PngContext_copy_settngs(&quantCxt, cxt);
+    PngContext_alloc_pixels(&quantCxt, cxt->width, cxt->height);
+    
+    assert(inputImageNumPixels == (cxt->width * cxt->height));
+
+    uint32_t *inOriginalPixels = cxt->pixels;
+    uint32_t *outQuantPixels = quantCxt.pixels;
+    
+    for (int i = 0; i < inputImageNumPixels; i++) {
+      uint32_t inPixel = inOriginalPixels[i];
+#if defined(DEBUG)
+      assert(inPixelToQuantPixel.count(inPixel) > 0);
+#endif // DEBUG
+      uint32_t quantPixel = inPixelToQuantPixel[inPixel];
+      outQuantPixels[i] = quantPixel;
+    }
+    
+    char *outQuantFilename = (char*)"quant.png";
+    
+    write_png_file((char*)outQuantFilename, &quantCxt);
+    
+    printf("wrote quant replaced pixels to %s\n", outQuantFilename);
+    
+    PngContext_dealloc(&quantCxt);
+  }
+  
   return;
 }
 
@@ -580,10 +629,34 @@ int main(int argc, char **argv) {
     fprintf(stderr, "usage divquantcluster PNG\n");
     exit(1);
   }
-  
   PngContext cxt;
   read_png_file(argv[1], &cxt);
   
+  if ((0)) {
+    // Write input data just read back out to a PNG image to make sure read/write logic
+    // is dealing correctly with wacky issues like grayscale and palette images
+    
+    PngContext copyCxt;
+    PngContext_init(&copyCxt);
+    PngContext_copy_settngs(&copyCxt, &cxt);
+    PngContext_alloc_pixels(&copyCxt, cxt.width, cxt.height);
+    
+    uint32_t *inOriginalPixels = cxt.pixels;
+    uint32_t *outPixels = copyCxt.pixels;
+    
+    int numPixels = cxt.width * cxt.height;
+    
+    for (int i = 0; i < numPixels; i++) {
+      uint32_t inPixel = inOriginalPixels[i];
+      outPixels[i] = inPixel;
+    }
+    
+    char *inoutFilename = (char*)"in_out.png";
+    write_png_file((char*)inoutFilename, &copyCxt);
+    printf("wrote input copy to %s\n", inoutFilename);
+    PngContext_dealloc(&copyCxt);
+  }
+
   printf("processing %d pixels from image of dimensions %d x %d\n", cxt.width*cxt.height, cxt.width, cxt.height);
   
   process_file(&cxt);
