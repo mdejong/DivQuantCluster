@@ -24,3 +24,5 @@ This library is able to process the image into 256 clusters in about 1/2 a secon
 using less than 10 megs of memory.
 
 M. E. Celebi, Q. Wen, S. Hwang, An Effective Real-Time Color Quantization Method Based on Divisive Hierarchical Clustering, Journal of Real-Time Image Processing, 10(2): 329-344, 2015
+
+http://link.springer.com/article/10.1007%2Fs11554-012-0291-4
