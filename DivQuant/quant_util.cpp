@@ -51,7 +51,7 @@ void quant_recurse ( uint32_t numPixels, const uint32_t *inPixelsPtr, uint32_t *
     t1 = clock();
   }
   
-  if (0) {
+  if ((0)) {
     // Determine adler32 for input pixels
     
     uLong adlerSig = adler32(0L, (const Bytef*)inPixelsPtr, (uInt)(numPixels * sizeof(uint32_t)));

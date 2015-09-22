@@ -13,6 +13,11 @@ For example, the very large 4K (4096 x 2160 pixels) image at:
 
 http://andyyoong.com/fs700-4k-raw-test/
 
-This image can be processed in about 10 seconds with a reasonably fast quant methods like Gvm or pngquant.
+On a desktop system, the 4k image above can be processed in about 10 seconds with a
+reasonably fast quant methods like Gvm or pngquant.
 
-This library is able to process the image in about 1/2 a second on the desktop.
+https://pngquant.org/
+https://github.com/mdejong/GvmCpp
+
+This library is able to process the image into 256 clusters in about 1/2 a second while
+using less than 10 megs of memory.
