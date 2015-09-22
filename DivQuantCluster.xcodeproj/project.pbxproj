@@ -29,6 +29,12 @@
 		3CBF1F141BB0ADA10028625A /* DivQuantMisc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3CBF1F0E1BB0ADA10028625A /* DivQuantMisc.cpp */; };
 		3CBF1F151BB0ADA10028625A /* DivQuantUni.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3CBF1F0F1BB0ADA10028625A /* DivQuantUni.cpp */; };
 		3CBF1F161BB0ADA10028625A /* quant_util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3CBF1F101BB0ADA10028625A /* quant_util.cpp */; };
+		3CBF1F211BB0F0D70028625A /* DivQuantTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CBF1F201BB0F0D70028625A /* DivQuantTest.m */; };
+		3CBF1F251BB0F19F0028625A /* quant_util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3CBF1F101BB0ADA10028625A /* quant_util.cpp */; };
+		3CBF1F261BB0F1A20028625A /* DivQuantCluster.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3CBF1F0B1BB0ADA10028625A /* DivQuantCluster.cpp */; };
+		3CBF1F271BB0F1A50028625A /* DivQuantMapColors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3CBF1F0D1BB0ADA10028625A /* DivQuantMapColors.cpp */; };
+		3CBF1F281BB0F1AB0028625A /* DivQuantMisc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3CBF1F0E1BB0ADA10028625A /* DivQuantMisc.cpp */; };
+		3CBF1F291BB0F1AE0028625A /* DivQuantUni.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3CBF1F0F1BB0ADA10028625A /* DivQuantUni.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -79,6 +85,9 @@
 		3CBF1F101BB0ADA10028625A /* quant_util.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = quant_util.cpp; sourceTree = "<group>"; };
 		3CBF1F111BB0ADA10028625A /* quant_util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = quant_util.h; sourceTree = "<group>"; };
 		3CBF1F171BB0B2710028625A /* CalcError.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CalcError.h; sourceTree = "<group>"; };
+		3CBF1F1C1BB0F0D70028625A /* DivQuantTest.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DivQuantTest.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		3CBF1F1F1BB0F0D70028625A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		3CBF1F201BB0F0D70028625A /* DivQuantTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DivQuantTest.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -87,6 +96,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				3CBF1F091BB0A90E0028625A /* libz.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3CBF1F191BB0F0D70028625A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -103,6 +119,7 @@
 				3CBF1F171BB0B2710028625A /* CalcError.h */,
 				3CBF1F0A1BB0ADA10028625A /* DivQuant */,
 				3CBF1EDD1BB0A7D60028625A /* libpng */,
+				3CBF1F1D1BB0F0D70028625A /* DivQuantTest */,
 				3CBF1ED41BB0A6AC0028625A /* Products */,
 			);
 			sourceTree = "<group>";
@@ -111,6 +128,7 @@
 			isa = PBXGroup;
 			children = (
 				3CBF1ED31BB0A6AC0028625A /* DivQuantCluster */,
+				3CBF1F1C1BB0F0D70028625A /* DivQuantTest.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -158,6 +176,23 @@
 			path = DivQuant;
 			sourceTree = "<group>";
 		};
+		3CBF1F1D1BB0F0D70028625A /* DivQuantTest */ = {
+			isa = PBXGroup;
+			children = (
+				3CBF1F201BB0F0D70028625A /* DivQuantTest.m */,
+				3CBF1F1E1BB0F0D70028625A /* Supporting Files */,
+			);
+			path = DivQuantTest;
+			sourceTree = "<group>";
+		};
+		3CBF1F1E1BB0F0D70028625A /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				3CBF1F1F1BB0F0D70028625A /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -178,6 +213,23 @@
 			productReference = 3CBF1ED31BB0A6AC0028625A /* DivQuantCluster */;
 			productType = "com.apple.product-type.tool";
 		};
+		3CBF1F1B1BB0F0D70028625A /* DivQuantTest */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3CBF1F221BB0F0D70028625A /* Build configuration list for PBXNativeTarget "DivQuantTest" */;
+			buildPhases = (
+				3CBF1F181BB0F0D70028625A /* Sources */,
+				3CBF1F191BB0F0D70028625A /* Frameworks */,
+				3CBF1F1A1BB0F0D70028625A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DivQuantTest;
+			productName = DivQuantTest;
+			productReference = 3CBF1F1C1BB0F0D70028625A /* DivQuantTest.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -188,6 +240,9 @@
 				ORGANIZATIONNAME = helpurock;
 				TargetAttributes = {
 					3CBF1ED21BB0A6AC0028625A = {
+						CreatedOnToolsVersion = 6.4;
+					};
+					3CBF1F1B1BB0F0D70028625A = {
 						CreatedOnToolsVersion = 6.4;
 					};
 				};
@@ -205,9 +260,20 @@
 			projectRoot = "";
 			targets = (
 				3CBF1ED21BB0A6AC0028625A /* DivQuantCluster */,
+				3CBF1F1B1BB0F0D70028625A /* DivQuantTest */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		3CBF1F1A1BB0F0D70028625A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		3CBF1ECF1BB0A6AC0028625A /* Sources */ = {
@@ -235,6 +301,19 @@
 				3CBF1F041BB0A7D60028625A /* pngwutil.c in Sources */,
 				3CBF1F131BB0ADA10028625A /* DivQuantMapColors.cpp in Sources */,
 				3CBF1EFD1BB0A7D60028625A /* pngrtran.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3CBF1F181BB0F0D70028625A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3CBF1F291BB0F1AE0028625A /* DivQuantUni.cpp in Sources */,
+				3CBF1F281BB0F1AB0028625A /* DivQuantMisc.cpp in Sources */,
+				3CBF1F211BB0F0D70028625A /* DivQuantTest.m in Sources */,
+				3CBF1F251BB0F19F0028625A /* quant_util.cpp in Sources */,
+				3CBF1F271BB0F1A50028625A /* DivQuantMapColors.cpp in Sources */,
+				3CBF1F261BB0F1A20028625A /* DivQuantCluster.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -333,6 +412,38 @@
 			};
 			name = Release;
 		};
+		3CBF1F231BB0F0D70028625A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+					"$(inherited)",
+				);
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = DivQuantTest/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		3CBF1F241BB0F0D70028625A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = DivQuantTest/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -353,6 +464,14 @@
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
+		};
+		3CBF1F221BB0F0D70028625A /* Build configuration list for PBXNativeTarget "DivQuantTest" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3CBF1F231BB0F0D70028625A /* Debug */,
+				3CBF1F241BB0F0D70028625A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
 		};
 /* End XCConfigurationList section */
 	};
