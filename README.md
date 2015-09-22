@@ -2,8 +2,8 @@
 Clustering using divisive split and k-means
 
 This clustering approach was originally implemented by M. Emre Celebi. The clustering implementation
-provides an exceptionally fast clustering algorithm in C++ that is optimized speed and low memory
-embedded devices.
+provides an exceptionally fast clustering algorithm in C++ that is optimized for execution speed
+and for low memory use on embedded devices.
 
 The main.cpp logic demonstrates a specific application of clustering for image pixels. Each pixel is
 clustered in 3D space to produce a color sorted list of clusters and then the original pixels are
