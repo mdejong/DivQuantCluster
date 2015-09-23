@@ -298,7 +298,7 @@ DivQuantCluster<UW, MT>::cluster()
 #endif // DEBUG
 
   const bool is64Bit =
-#if defined(__LP64__)
+#if defined(__LP64__) && __LP64__
   true;
 #else
   false;
@@ -647,116 +647,145 @@ DivQuantCluster<UW, MT>::cluster()
       printf ( "Local kmeans Iteration %d\n", it );
 #endif
       
-      for ( ip = 0; ip < tmp_num_points; ip++ )
+      for ( ip = 0; ip < tmp_num_points; )
       {
-        uint32_t pixel = tmp_data[ip];
-        uint32_t B = pixel & 0xFF;
-        uint32_t G = (pixel >> 8) & 0xFF;
-        uint32_t R = (pixel >> 16) & 0xFF;
-        
-        red = R;
-        green = G;
-        blue = B;
-        
-        int pointindex = ip;
-        if (point_index) {
-          pointindex = point_index[ip];
+        int maxLoopOffset = 0xFFFF;
+        int numLeft = (tmp_num_points - ip);
+        if (numLeft < maxLoopOffset) {
+          maxLoopOffset = numLeft;
         }
-#if defined(DEBUG)
-        assert(pointindex >= 0 && pointindex < num_points);
-        assert(pointindex >= 0 && pointindex < member_size);
-#endif // DEBUG
-        if (UW) {
-#ifdef VERBOSE
-          tmp_weight = data_weight;
-#endif // VERBOSE
-        } else {
-          tmp_weight = weightsPtr[pointindex];
-        }
+        maxLoopOffset += ip;
         
-        if ( lhs < ( (rhs_red * red) + (rhs_green * green) + (rhs_blue * blue) ) )
-        {
-#ifdef VERBOSE
-          // Update the MSE of the old cluster
-          mse += tmp_weight *
-          ( SQR ( red - old_mean->red ) +
-           SQR ( green - old_mean->green ) +
-           SQR ( blue - old_mean->blue ) );
-#endif
+        uint32_t new_mean_red = 0;
+        uint32_t new_mean_green = 0;
+        uint32_t new_mean_blue = 0;
+        
+        uint32_t new_var_red = 0;
+        uint32_t new_var_green = 0;
+        uint32_t new_var_blue = 0;
+        
+        for ( ; ip < maxLoopOffset; ip++ ) {
           
-          if ( it == max_iters_m1 )
-          {
-            // Save the membership of the point
-            member[pointindex] = old_index;
-#ifdef VERBOSE
-            fprintf(stdout, "write member[%d] = %d (ip = %d)\n", pointindex, member[pointindex], ip);
-#endif
+          uint32_t pixel = tmp_data[ip];
+          uint32_t B = pixel & 0xFF;
+          uint32_t G = (pixel >> 8) & 0xFF;
+          uint32_t R = (pixel >> 16) & 0xFF;
+          
+          red = R;
+          green = G;
+          blue = B;
+          
+          int pointindex = ip;
+          if (point_index) {
+            pointindex = point_index[ip];
           }
-        }
-        else
-        {
+#if defined(DEBUG)
+          assert(pointindex >= 0 && pointindex < num_points);
+          assert(pointindex >= 0 && pointindex < member_size);
+#endif // DEBUG
+          if (UW) {
 #ifdef VERBOSE
-          // Update the MSE of the new cluster
-          mse += tmp_weight *
-          ( SQR ( red - old_mean->red + rhs_red ) +
-           SQR ( green - old_mean->green + rhs_green ) +
-           SQR ( blue - old_mean->blue + rhs_blue ) );
-#endif
+            tmp_weight = data_weight;
+#endif // VERBOSE
+          } else {
+            tmp_weight = weightsPtr[pointindex];
+          }
           
-          if ( it != max_iters_m1 )
+          if ( lhs < ( (rhs_red * red) + (rhs_green * green) + (rhs_blue * blue) ) )
           {
-            // Update only mean
+#ifdef VERBOSE
+            // Update the MSE of the old cluster
+            mse += tmp_weight *
+            ( SQR ( red - old_mean->red ) +
+             SQR ( green - old_mean->green ) +
+             SQR ( blue - old_mean->blue ) );
+#endif
             
-            if (UW) {
-              new_mean->red += red;
-              new_mean->green += green;
-              new_mean->blue += blue;
-            } else {
-              new_mean->red += tmp_weight * red;
-              new_mean->green += tmp_weight * green;
-              new_mean->blue += tmp_weight * blue;
+            if ( it == max_iters_m1 )
+            {
+              // Save the membership of the point
+              member[pointindex] = old_index;
+#ifdef VERBOSE
+              fprintf(stdout, "write member[%d] = %d (ip = %d)\n", pointindex, member[pointindex], ip);
+#endif
             }
           }
           else
           {
-            // Update mean and variance
-            
-            if (UW) {
-              new_mean->red += red;
-              new_mean->green += green;
-              new_mean->blue += blue;
-            } else {
-              new_mean->red += tmp_weight * red;
-              new_mean->green += tmp_weight * green;
-              new_mean->blue += tmp_weight * blue;
-            }
-
-            if (UW) {
-              new_var->red += ( R * R );
-              new_var->green += ( G * G );
-              new_var->blue += ( B * B );
-            } else {
-              new_var->red += tmp_weight * ( R * R );
-              new_var->green += tmp_weight * ( G * G );
-              new_var->blue += tmp_weight * ( B * B );
-            }
-            
-            // Save the membership of the point
-            member[pointindex] = new_index;
 #ifdef VERBOSE
-            fprintf(stdout, "write member[%d] = %d (ip = %d)\n", pointindex, member[pointindex], ip);
+            // Update the MSE of the new cluster
+            mse += tmp_weight *
+            ( SQR ( red - old_mean->red + rhs_red ) +
+             SQR ( green - old_mean->green + rhs_green ) +
+             SQR ( blue - old_mean->blue + rhs_blue ) );
 #endif
+            
+            if ( it != max_iters_m1 )
+            {
+              // Update only mean
+              
+              if (UW) {
+                new_mean_red += R;
+                new_mean_green += G;
+                new_mean_blue += B;
+              } else {
+                new_mean->red += tmp_weight * red;
+                new_mean->green += tmp_weight * green;
+                new_mean->blue += tmp_weight * blue;
+              }
+            }
+            else
+            {
+              // Update mean and variance
+              
+              if (UW) {
+                new_mean_red += R;
+                new_mean_green += G;
+                new_mean_blue += B;
+              } else {
+                new_mean->red += tmp_weight * red;
+                new_mean->green += tmp_weight * green;
+                new_mean->blue += tmp_weight * blue;
+              }
+              
+              if (UW) {
+                new_var_red += ( R * R );
+                new_var_green += ( G * G );
+                new_var_blue += ( B * B );
+              } else {
+                new_var->red += tmp_weight * ( R * R );
+                new_var->green += tmp_weight * ( G * G );
+                new_var->blue += tmp_weight * ( B * B );
+              }
+              
+              // Save the membership of the point
+              member[pointindex] = new_index;
+#ifdef VERBOSE
+              fprintf(stdout, "write member[%d] = %d (ip = %d)\n", pointindex, member[pointindex], ip);
+#endif
+            }
+            
+            // Update the weight/size of the new cluster
+            
+            if (UW) {
+            } else {
+              new_weight += tmp_weight;
+            }
+            new_size++;
           }
+        } // end foreach tmp_num_points inner loop
+        
+        if (UW) {
+          new_mean->red += new_mean_red;
+          new_mean->green += new_mean_green;
+          new_mean->blue += new_mean_blue;
           
-          // Update the weight/size of the new cluster
-          
-          if (UW) {
-          } else {
-            new_weight += tmp_weight;
-          }
-          new_size++;
+          new_var->red += new_var_red;
+          new_var->green += new_var_green;
+          new_var->blue += new_var_blue;
         }
-      } // end foreach tmp_num_points
+        
+      } // end foreach tmp_num_points outer loop
       
 #ifdef VERBOSE
       printf ( "\tLocal Iteration %d: MSE = %f\n", it, mse );
