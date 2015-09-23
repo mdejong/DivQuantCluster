@@ -469,107 +469,131 @@ DivQuantCluster<UW, MT, KM>::cluster()
       RESET_PIXEL ( new_var );
     }
     
-    /* STEP 3: SPLIT THE CLUSTER OLD_INDEX */
-    for ( ip = 0; ip < tmp_num_points; ip++ )
+    // STEP 3: SPLIT THE CLUSTER OLD_INDEX
+    
+    for ( ip = 0; ip < tmp_num_points; )
     {
-      uint32_t pixel = tmp_data[ip];
-      uint32_t B = pixel & 0xFF;
-      uint32_t G = (pixel >> 8) & 0xFF;
-      uint32_t R = (pixel >> 16) & 0xFF;
+      uint32_t new_mean_red = 0;
+      uint32_t new_mean_green = 0;
+      uint32_t new_mean_blue = 0;
       
-      red = R;
-      green = G;
-      blue = B;
+      uint32_t new_var_red = 0;
+      uint32_t new_var_green = 0;
+      uint32_t new_var_blue = 0;
       
+      int maxLoopOffset = 0xFFFF;
+      int numLeft = (tmp_num_points - ip);
+      if (numLeft < maxLoopOffset) {
+        maxLoopOffset = numLeft;
+      }
+      maxLoopOffset += ip;
+      
+      for ( ; ip < maxLoopOffset; ip++ ) {
+        
+        uint32_t pixel = tmp_data[ip];
+        uint32_t B = pixel & 0xFF;
+        uint32_t G = (pixel >> 8) & 0xFF;
+        uint32_t R = (pixel >> 16) & 0xFF;
+        
 #ifdef VERBOSE
-      printf ( "pixel (R G B) (%3.2f %3.2f %3.2f)\n", red, green, blue );
-#endif
-      
-      proj_val = ( ( cut_axis == 0 ) ? red :
-                  ( ( cut_axis == 1 ) ? green : blue ) );
-      
-      // FIXME: if different loops for different cut axis, then that might
-      // execute more quickly over the N points. Avoids 2 branches.
-      // Also note that these compare operations are on floats. Also,
-      // no reason to do 3 memory reads if only one will be used.
-      
-#ifdef VERBOSE
-      printf ( "proj_val %8.2f and cut_pos %8.2f\n", proj_val, cut_pos);
-#endif
-      
-      if ( cut_pos < proj_val )
-      {
-#ifdef VERBOSE
-        printf ( "Cut GT   : %0.2f < %0.2f\n", cut_pos, proj_val);
+        printf ( "pixel (R G B) (%d %d %d)\n", R, G, B );
 #endif
         
-        if (UW) {
-          new_mean->red += red;
-          new_mean->green += green;
-          new_mean->blue += blue;
-        } else {
-          // non-uniform weights
-          
-          int pointindex = ip;
-          if (point_index) {
-            pointindex = point_index[ip];
-          }
-#if defined(DEBUG)
-          assert(pointindex >= 0 && pointindex < member_size);
-#endif // DEBUG
-          tmp_weight = weightsPtr[pointindex];
-          
-          new_mean->red += tmp_weight * red;
-          new_mean->green += tmp_weight * green;
-          new_mean->blue += tmp_weight * blue;
-        }
+        proj_val = ( ( cut_axis == 0 ) ? R :
+                    ( ( cut_axis == 1 ) ? G : B ) );
         
-        // Update the point membership and variance/size of the new cluster
-        if ( !KM && !apply_lkm )
+#ifdef VERBOSE
+        printf ( "proj_val %8.2f and cut_pos %8.2f\n", proj_val, cut_pos);
+#endif
+        
+        if ( cut_pos < proj_val )
         {
-          int pointindex = ip;
-          if (point_index) {
-            pointindex = point_index[ip];
-          }
-#if defined(DEBUG)
-          assert(pointindex >= 0 && pointindex < member_size);
-#endif // DEBUG
-          member[pointindex] = new_index;
 #ifdef VERBOSE
-          fprintf(stdout, "write member[%d] = %d (ip = %d)\n", pointindex, member[pointindex], ip);
+          printf ( "Cut GT   : %0.2f < %0.2f\n", cut_pos, proj_val);
 #endif
           
           if (UW) {
-            new_var->red += ( R * R );
-            new_var->green += ( G * G );
-            new_var->blue += ( B * B );
+            new_mean_red += R;
+            new_mean_green += G;
+            new_mean_blue += B;
           } else {
             // non-uniform weights
             
-            // tmp_weight already set above in loop
+            int pointindex = ip;
+            if (point_index) {
+              pointindex = point_index[ip];
+            }
+#if defined(DEBUG)
+            assert(pointindex >= 0 && pointindex < member_size);
+#endif // DEBUG
+            tmp_weight = weightsPtr[pointindex];
             
-            new_var->red += tmp_weight * ( R * R );
-            new_var->green += tmp_weight * ( G * G );
-            new_var->blue += tmp_weight * ( B * B );
+            new_mean->red += tmp_weight * R;
+            new_mean->green += tmp_weight * G;
+            new_mean->blue += tmp_weight * B;
           }
           
-          new_size++;
-        }
-        
-        // Update the weight of the new cluster
-        
-        if (UW) {
-          new_weight_count += 1;
-        } else {
-          new_weight += tmp_weight;
-        }
-      } else {
+          // Update the point membership and variance/size of the new cluster
+          if ( !KM && !apply_lkm )
+          {
+            int pointindex = ip;
+            if (point_index) {
+              pointindex = point_index[ip];
+            }
+#if defined(DEBUG)
+            assert(pointindex >= 0 && pointindex < member_size);
+#endif // DEBUG
+            member[pointindex] = new_index;
 #ifdef VERBOSE
-        printf ( "Cut LTEQ : %0.2f >= %0.2f\n", cut_pos, proj_val);
+            fprintf(stdout, "write member[%d] = %d (ip = %d)\n", pointindex, member[pointindex], ip);
 #endif
-      }
-    } // end split for loop
+            
+            if (UW) {
+              new_var_red += ( R * R );
+              new_var_green += ( G * G );
+              new_var_blue += ( B * B );
+            } else {
+              // non-uniform weights
+              
+              // tmp_weight already set above in loop
+              
+              new_var->red += tmp_weight * ( R * R );
+              new_var->green += tmp_weight * ( G * G );
+              new_var->blue += tmp_weight * ( B * B );
+            }
+            
+            new_size++;
+          }
+          
+          // Update the weight of the new cluster
+          
+          if (UW) {
+            new_weight_count += 1;
+          } else {
+            new_weight += tmp_weight;
+          }
+        } else {
+#ifdef VERBOSE
+          printf ( "Cut LTEQ : %0.2f >= %0.2f\n", cut_pos, proj_val);
+#endif
+        }
+        
+      } // end foreach tmp_num_points inner loop
       
+      if (UW) {
+        new_mean->red += new_mean_red;
+        new_mean->green += new_mean_green;
+        new_mean->blue += new_mean_blue;
+        
+        if ( !KM && !apply_lkm ) {
+          new_var->red += new_var_red;
+          new_var->green += new_var_green;
+          new_var->blue += new_var_blue;
+        }
+      }
+      
+    } // end foreach tmp_num_points outer loop
+    
     if (UW) {
       new_mean->red *= data_weight;
       new_mean->green *= data_weight;
