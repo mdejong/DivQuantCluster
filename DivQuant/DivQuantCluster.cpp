@@ -35,8 +35,9 @@ using namespace std;
 
 // UW  : true if a uniform weight applies to each pixel evenly
 // MT  : type of the member attribute, either uint8_t uint32_t
+// KM  : true if 1 or more kmeans iterations will be applied
 
-template <bool UW, typename MT>
+template <bool UW, typename MT, bool KM>
 class DivQuantCluster {
 public:
 
@@ -174,9 +175,9 @@ private:
 /* C1: subcluster #1 (old_index) */
 /* C2: subcluster #2 (new_index) */
 
-template <bool UW, typename MT>
+template <bool UW, typename MT, bool KM>
 void
-DivQuantCluster<UW, MT>::cluster()
+DivQuantCluster<UW, MT, KM>::cluster()
 {
   int ic, ip, it;
   int max_iters_m1; /* MAX_ITERS - 1 */
@@ -462,7 +463,7 @@ DivQuantCluster<UW, MT>::cluster()
     uint32_t new_weight_count = 0;
     RESET_PIXEL ( new_mean );
     
-    if ( !apply_lkm )
+    if ( !KM && !apply_lkm )
     {
       new_size = 0;
       RESET_PIXEL ( new_var );
@@ -524,7 +525,7 @@ DivQuantCluster<UW, MT>::cluster()
         }
         
         // Update the point membership and variance/size of the new cluster
-        if ( !apply_lkm )
+        if ( !KM && !apply_lkm )
         {
           int pointindex = ip;
           if (point_index) {
@@ -576,7 +577,7 @@ DivQuantCluster<UW, MT>::cluster()
       
       new_weight = new_weight_count * data_weight;
       
-      if ( !apply_lkm ) {
+      if ( !KM && !apply_lkm ) {
         new_var->red *= data_weight;
         new_var->green *= data_weight;
         new_var->blue *= data_weight;
@@ -1158,7 +1159,7 @@ quant_varpart_fast (
     if (num_colors <= 256) {
       // Uniform weight and each cluster int fits in one byte
       
-      DivQuantCluster<true, uint8_t> dqCluster;
+      DivQuantCluster<true, uint8_t, true> dqCluster;
       
       dqCluster.numPoints = num_points;
       dqCluster.numClusters = num_colors;
@@ -1178,7 +1179,7 @@ quant_varpart_fast (
     } else {
       // Uniform weight where each cluster fits in a word
 
-      DivQuantCluster<true, uint32_t> dqCluster;
+      DivQuantCluster<true, uint32_t, true> dqCluster;
       
       dqCluster.numPoints = num_points;
       dqCluster.numClusters = num_colors;
@@ -1200,7 +1201,7 @@ quant_varpart_fast (
     // Non-uniform weights (num clusters unrestrained)
     
     if (num_colors <= 256) {
-      DivQuantCluster<false, uint8_t> dqCluster;
+      DivQuantCluster<false, uint8_t, true> dqCluster;
       
       dqCluster.numPoints = num_points;
       dqCluster.numClusters = num_colors;
@@ -1218,7 +1219,7 @@ quant_varpart_fast (
       
       vec = dqCluster.colortable;
     } else {
-      DivQuantCluster<false, uint32_t> dqCluster;
+      DivQuantCluster<false, uint32_t, true> dqCluster;
       
       dqCluster.numPoints = num_points;
       dqCluster.numClusters = num_colors;
