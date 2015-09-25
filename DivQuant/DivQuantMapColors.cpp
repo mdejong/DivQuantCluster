@@ -239,7 +239,7 @@ sort_color ( Pixel_Int *cmap, const int num_colors )
 }
 
 void
-map_colors_mps ( const uint32_t *inPixelsPtr, uint32_t numPixels, uint32_t *outPixelsPtr, const std::vector<uint32_t> &colormap )
+map_colors_mps ( const uint32_t *inPixelsPtr, uint32_t numPixels, uint32_t *outPixelsPtr, uint32_t *outColortablePtr, int colormapSize )
 {
   int ik, ic;
   int index;
@@ -258,9 +258,8 @@ map_colors_mps ( const uint32_t *inPixelsPtr, uint32_t numPixels, uint32_t *outP
   double *lut_ssd_buffer;
   double *lut_ssd;
   int size_lut_ssd;
-  int i;
   
-  int num_colors = (int) colormap.size();
+  int num_colors = colormapSize;
   assert(num_colors > 0);
   
   lut_init = ( int * ) malloc ( size_lut_init * sizeof ( int ) );
@@ -270,14 +269,13 @@ map_colors_mps ( const uint32_t *inPixelsPtr, uint32_t numPixels, uint32_t *outP
   /* Duplicate the color map */
   
   cmap = ( Pixel_Int * ) malloc ( num_colors * sizeof ( Pixel_Int ) );
-  i = 0;
-  for ( uint32_t pixel : colormap ) {
+  for (int i = 0; i < num_colors; i++) {
+    uint32_t pixel = outColortablePtr[i];
     Pixel_Int *pi = &cmap[i];
     pi->blue = pixel & 0xFF;
     pi->green = (pixel >> 8) & 0xFF;
     pi->red = (pixel >> 16) & 0xFF;
     pi->weight = 0;
-    i++;
   }
   
   //  for ( int si = 0; si < num_colors; si++ ) {

@@ -24,9 +24,7 @@ void quant_recurse ( uint32_t numPixels, const uint32_t *inPixelsPtr, uint32_t *
   
   //int num_colors = 256;
   
-  int num_colors = *numClustersPtr;
-  
-  bool allPixelsUnique = true;
+  int allPixelsUnique = 1;
   
   int max_iters = 10;
   //int max_iters = 5;
@@ -45,8 +43,6 @@ void quant_recurse ( uint32_t numPixels, const uint32_t *inPixelsPtr, uint32_t *
   //  int dec_factor = 1;
   //  int num_bits = 6;
   
-  int act_num_colors;
-  
   if (displayTimings) {
     t1 = clock();
   }
@@ -59,7 +55,7 @@ void quant_recurse ( uint32_t numPixels, const uint32_t *inPixelsPtr, uint32_t *
     fprintf(stdout, "quant_varpart_fast() input pixels adler 0x%08X\n", (int)adlerSig);
   }
   
-  vector<uint32_t> colortable = quant_varpart_fast( numPixels, inPixelsPtr, outPixelsPtr, 1, numPixels, num_colors, num_bits, dec_factor, max_iters, allPixelsUnique);
+  quant_varpart_fast( numPixels, inPixelsPtr, outPixelsPtr, 1, numPixels, numClustersPtr, outColortablePtr, num_bits, dec_factor, max_iters, allPixelsUnique);
   
   if (displayTimings) {
     t2 = clock();
@@ -67,7 +63,7 @@ void quant_recurse ( uint32_t numPixels, const uint32_t *inPixelsPtr, uint32_t *
     printf("quant_varpart_fast() elapsed: %ld ms aka %0.2f s\n", elapsed, elapsed/1000.0f);
   }
   
-  act_num_colors = *numClustersPtr = (uint32_t)colortable.size();
+  int act_num_colors = *numClustersPtr;
   
   // Dump cmap entries
   
@@ -75,7 +71,7 @@ void quant_recurse ( uint32_t numPixels, const uint32_t *inPixelsPtr, uint32_t *
     t1 = clock();
   }
   
-  map_colors_mps ( inPixelsPtr, numPixels, outPixelsPtr, colortable );
+  map_colors_mps ( inPixelsPtr, numPixels, outPixelsPtr, outColortablePtr, act_num_colors );
   
   if (displayTimings) {
     t2 = clock();
@@ -83,10 +79,12 @@ void quant_recurse ( uint32_t numPixels, const uint32_t *inPixelsPtr, uint32_t *
     printf("map_colors_mps() elapsed: %ld ms aka %0.2f s\n", elapsed, elapsed/1000.0f);
   }
   
+  if ((0)) {
+  
   for ( int i = 0; i < act_num_colors; i++ ) {
     // Note that red, green, blue already converted to int at this point
     
-    uint32_t colortablePixel = colortable[i];
+    uint32_t colortablePixel = outPixelsPtr[i];
 
     uint32_t B = colortablePixel & 0xFF;
     uint32_t G = (colortablePixel >> 8) & 0xFF;
@@ -96,8 +94,8 @@ void quant_recurse ( uint32_t numPixels, const uint32_t *inPixelsPtr, uint32_t *
     if ((0)) {
       fprintf(stdout, "cmap[%3d] = 0x%08X = R G B ( %3d %3d %3d )\n", i, pixel, R, G, B);
     }
+  }
     
-    outColortablePtr[i] = pixel;
   }
   
   if ((0)) {

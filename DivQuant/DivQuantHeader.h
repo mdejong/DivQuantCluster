@@ -60,8 +60,7 @@ get_double_scale(const uint32_t *inPixels,
 
 long timediff(clock_t t1, clock_t t2);
 
-void
-map_colors_mps ( const uint32_t *inPixelsPtr, uint32_t numPixels, uint32_t *outPixelsPtr, const std::vector<uint32_t> &colormap );
+void map_colors_mps ( const uint32_t *inPixelsPtr, uint32_t numPixels, uint32_t *outPixelsPtr, uint32_t *outColortablePtr, int colormapSize );
 
 double *
 calc_color_table ( const uint32_t *inPixels,
@@ -80,18 +79,19 @@ cut_bits ( const uint32_t *inPixels,
           const uchar num_bits_green,
           const uchar num_bits_blue );
 
-std::vector<uint32_t>
+void
 quant_varpart_fast (
                     const uint32_t numPixels,
                     const uint32_t *inPixels,
                     uint32_t *tmpPixels,
                     const uint32_t numRows,
                     const uint32_t numCols,
-                    const int num_colors,
+                    uint32_t *numClustersPtr,
+                    uint32_t *colortablePtr,
                     const int num_bits,
                     const int dec_factor,
                     const int max_iters,
-                    const bool allPixelsUnique);
+                    const int allPixelsUnique);
 
 int validate_num_bits ( const uchar );
 

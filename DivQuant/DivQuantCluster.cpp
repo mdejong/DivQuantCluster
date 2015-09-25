@@ -29,7 +29,100 @@ using namespace std;
 
 //#define VERBOSE
 
-// This class defines a clustering method that divides the input into
+// UW  : true if a uniform weight applies to each pixel evenly
+// MT  : type of the member attribute, either uint8_t uint32_t
+// KM  : true if 1 or more kmeans iterations will be applied
+
+template <bool UW, typename MT, bool KM>
+
+#if defined(__LP64__) && __LP64__
+// nop, 64 bit hardware has many more registers to make use of.
+#else
+// 32 bit register starvation is eased by not inlining this logic
+// when compiling with clang or g++ compilers.
+# if defined(__clang__) || defined(__GNUC__)
+__attribute__ ((noinline))
+# endif // __clang__ || __GNUC__
+#endif // __LP64__
+
+void
+DivQuantClusterInitMeanAndVar(
+                const int num_points,
+                const uint32_t *data,
+                const double data_weight,
+                double *weightsPtr,
+                Pixel_Double *total_mean,
+                Pixel_Double *total_var)
+{
+  double mean_red = 0.0, mean_green = 0.0, mean_blue = 0.0;
+  double var_red = 0.0, var_green = 0.0, var_blue = 0.0;
+  
+  for ( int ip = 0; ip < num_points; ip++ )
+  {
+    uint32_t pixel = data[ip];
+    uint32_t B = pixel & 0xFF;
+    uint32_t G = (pixel >> 8) & 0xFF;
+    uint32_t R = (pixel >> 16) & 0xFF;
+    
+    if (UW) {
+      mean_red += R;
+      mean_green += G;
+      mean_blue += B;
+      
+      var_red += ( R * R );
+      var_green += ( G * G );
+      var_blue += ( B * B );
+    } else {
+      // non-uniform weights
+      
+      double tmp_weight = weightsPtr[ip];
+      
+      mean_red += tmp_weight * R;
+      mean_green += tmp_weight * G;
+      mean_blue += tmp_weight * B;
+      
+      var_red += tmp_weight * ( R * R );
+      var_green += tmp_weight * ( G * G );
+      var_blue += tmp_weight * ( B * B );
+    }
+  }
+  
+  if (UW) {
+    // In uniform weight case do the multiply outside the loop
+    
+    mean_red *= data_weight;
+    mean_green *= data_weight;
+    mean_blue *= data_weight;
+    
+    var_red *= data_weight;
+    var_green *= data_weight;
+    var_blue *= data_weight;
+  }
+  
+  var_red -= SQR ( mean_red );
+  var_green -= SQR ( mean_green );
+  var_blue -= SQR ( mean_blue );
+  
+  // Copy data to user supplied pointers
+  
+  total_mean->red = mean_red;
+  total_mean->green = mean_green;
+  total_mean->blue = mean_blue;
+  
+  total_var->red = var_red;
+  total_var->green = var_green;
+  total_var->blue = var_blue;
+  
+#ifdef VERBOSE
+  if ( 1 )
+  {
+    printf ( "new Global mean (R G B) (%0.2f %0.2f %0.2f)\n", total_mean->red, total_mean->green, total_mean->blue );
+    printf ( "new Global var  (R G B) (%0.2f %0.2f %0.2f)\n", total_var->red, total_var->green, total_var->blue );
+  }
+#endif
+}
+
+// This method defines a clustering approach that divides the input into
 // roughly equally sized clusters until N clusters is reached or the
 // clusters can be divided no more.
 
@@ -38,146 +131,17 @@ using namespace std;
 // KM  : true if 1 or more kmeans iterations will be applied
 
 template <bool UW, typename MT, bool KM>
-class DivQuantCluster {
-public:
-
-  // The number of input pixels in the buffer pointed to by inPixelsPtr
-  uint32_t numPoints;
-  
-  // The BGRX format pixels that contain (R G B) pixels to be processed
-  uint32_t *inPixelsPtr;
-
-  uint32_t *tmpPixelsPtr;
-
-  // In the case where input pixel values have weights that are pixel
-  // specific then this weight vector must be non-NULL.
-  
-  double *weightsPtr;
-  
-  // If there is a uniform weight applied to each pixel then weights
-  // multiplications can be defered until the end of a loop which
-  // can be a significant advantage.
-  
-  double weightUniform;
-  
-  // The number of k-means iterations done after each cluster split loop
-  int maxNumIterations;
-  
-  // The caller should set the number of clusters desired, when the
-  // logic returns the number of actual clusters can be read from
-  // this property of from the colortable.size() property.
-  
-  int numClusters;
-  
-  // Value in the range 1 -> 8 to indicate the number of valid bits.
-  // A right shift of (8 - N) will ignore bits on the right side
-  // of the result.
-  
-  int numBits;
-  
-  // The output of this logic is a colortable of pixels
-  
-  std::vector<uint32_t> colortable;
-
-  // The member array is either uint8_t or uint32_t.
-  
-  MT *member;
-  
-  // constructor
-  DivQuantCluster<UW, MT>() {}
-  
-  // The primary entry point
-  
-  void cluster();
-  
-private:
-  
-  Pixel_Double total_mean_prop; // componentwise mean of C
-  Pixel_Double total_var_prop; // componentwise variance of C
-
-  // Util method that does initial calculations to determine mean and variance for all input pixels
-  
-  void initMeanAndVar(Pixel_Double *total_mean, Pixel_Double *total_var) {
-    const int num_points = this->numPoints;
-    const uint32_t *data = this->inPixelsPtr;
-    const double data_weight = this->weightUniform;
-    
-    double mean_red = 0.0, mean_green = 0.0, mean_blue = 0.0;
-    double var_red = 0.0, var_green = 0.0, var_blue = 0.0;
-    
-    for ( int ip = 0; ip < num_points; ip++ )
-    {
-      uint32_t pixel = data[ip];
-      uint32_t B = pixel & 0xFF;
-      uint32_t G = (pixel >> 8) & 0xFF;
-      uint32_t R = (pixel >> 16) & 0xFF;
-      
-      if (UW) {
-        mean_red += R;
-        mean_green += G;
-        mean_blue += B;
-        
-        var_red += ( R * R );
-        var_green += ( G * G );
-        var_blue += ( B * B );
-      } else {
-        // non-uniform weights
-
-        double tmp_weight = weightsPtr[ip];
-        
-        mean_red += tmp_weight * R;
-        mean_green += tmp_weight * G;
-        mean_blue += tmp_weight * B;
-        
-        var_red += tmp_weight * ( R * R );
-        var_green += tmp_weight * ( G * G );
-        var_blue += tmp_weight * ( B * B );
-      }
-    }
-    
-    if (UW) {
-      // In uniform weight case do the multiply outside the loop
-      
-      mean_red *= data_weight;
-      mean_green *= data_weight;
-      mean_blue *= data_weight;
-      
-      var_red *= data_weight;
-      var_green *= data_weight;
-      var_blue *= data_weight;
-    }
-    
-    var_red -= SQR ( mean_red );
-    var_green -= SQR ( mean_green );
-    var_blue -= SQR ( mean_blue );
-
-    // Copy data to user supplied pointers
-    
-    total_mean->red = mean_red;
-    total_mean->green = mean_green;
-    total_mean->blue = mean_blue;
-    
-    total_var->red = var_red;
-    total_var->green = var_green;
-    total_var->blue = var_blue;
-    
-#ifdef VERBOSE
-    if ( 1 )
-    {
-      printf ( "new Global mean (R G B) (%0.2f %0.2f %0.2f)\n", total_mean->red, total_mean->green, total_mean->blue );
-      printf ( "new Global var  (R G B) (%0.2f %0.2f %0.2f)\n", total_var->red, total_var->green, total_var->blue );
-    }
-#endif
-  }
-};
-
-/* C: cluster to be split (old_index)*/
-/* C1: subcluster #1 (old_index) */
-/* C2: subcluster #2 (new_index) */
-
-template <bool UW, typename MT, bool KM>
 void
-DivQuantCluster<UW, MT, KM>::cluster()
+DivQuantCluster(
+                const int num_points,
+                const uint32_t *data,
+                uint32_t *tmp_buffer,
+                const double data_weight,
+                double *weightsPtr,
+                const int num_bits,
+                const int max_iters,
+                uint32_t *colortablePtr,
+                uint32_t *numClustersPtr)
 {
   int ic, ip, it;
   int max_iters_m1; /* MAX_ITERS - 1 */
@@ -189,7 +153,7 @@ DivQuantCluster<UW, MT, KM>::cluster()
   int count;
   int shift_amount;
   int num_empty; /* # empty clusters */
-
+  
 #if defined(DEBUG)
   int member_size;
 #endif // DEBUG
@@ -231,20 +195,21 @@ DivQuantCluster<UW, MT, KM>::cluster()
   Pixel_Double *new_mean; /* componentwise mean of C2 */
   Pixel_Double *old_var; /* componentwise variance of C1 */
   Pixel_Double *new_var; /* componentwise variance of C2 */
-
+  
+  Pixel_Double total_mean_prop; // componentwise mean of C
+  Pixel_Double total_var_prop; // componentwise variance of C
+  
+  // The member array is either uint8_t or uint32_t.
+  
+  MT *member;
+  
   // Capacity in num points that can be stored in tmp_data
   uint32_t *tmp_data; /* temporary data set (holds the cluster to be split) */
   int tmp_buffer_used;
   
-  // Input parameter names
-  
-  const int num_points = this->numPoints;
   assert(num_points > 0);
-  const uint32_t *data = this->inPixelsPtr;
-  const uint32_t *tmp_buffer = this->tmpPixelsPtr;
   
-  const double *dataWeights = this->weightsPtr;
-  const double data_weight = this->weightUniform;
+  const double *dataWeights = weightsPtr;
   if (dataWeights == nullptr) {
     assert(data_weight > 0.0);
   }
@@ -259,10 +224,8 @@ DivQuantCluster<UW, MT, KM>::cluster()
 #endif // DEBUG
   }
   
-  const int num_colors = this->numClusters;
+  const int num_colors = *numClustersPtr;
   assert(num_colors > 0);
-  const int num_bits = this->numBits;
-  const int max_iters = this->maxNumIterations;
   
   apply_lkm = 0 < max_iters ? 1 : 0;
   max_iters_m1 = max_iters - 1;
@@ -390,7 +353,7 @@ DivQuantCluster<UW, MT, KM>::cluster()
     
     if ( new_index == 1 )
     {
-      initMeanAndVar(total_mean, total_var);
+      DivQuantClusterInitMeanAndVar<UW, MT, KM>(num_points, data, data_weight, weightsPtr, total_mean, total_var);
     }
     else
     {
@@ -1023,7 +986,7 @@ DivQuantCluster<UW, MT, KM>::cluster()
     }
     
     // Read 1 to N values from member array one at a time
-      
+
     for ( ; ip < num_points; ip++ )
     {
 #if defined(DEBUG)
@@ -1066,7 +1029,7 @@ DivQuantCluster<UW, MT, KM>::cluster()
   shift_amount = 8 - num_bits;
   num_empty = 0;
   for ( ic = 0; ic < num_colors; ic++ )
-  {    
+  {
 #if defined(DEBUG)
     assert(ic >= 0 && ic < size_size);
 #endif // DEBUG
@@ -1086,13 +1049,13 @@ DivQuantCluster<UW, MT, KM>::cluster()
       uint32_t G = ( ( uint8_t ) ( mean[ic].green + 0.5 ) ) << shift_amount; /* round */
       uint32_t B = ( ( uint8_t ) ( mean[ic].blue + 0.5 ) ) << shift_amount; /* round */
       uint32_t pixel = (R << 16) | (G << 8) | B;
-      colortable.push_back(pixel);
+      colortablePtr[ic] = pixel;
       
 #ifdef VERBOSE
       printf ( "\t%d : Rounded ( %d %d %d ) \n", ic, R, G, B);
 #endif
     }
-    else 
+    else
     {
       /* Empty cluster */
       num_empty++;
@@ -1125,22 +1088,25 @@ DivQuantCluster<UW, MT, KM>::cluster()
   delete [] mean;
   delete [] var;
   
-  this->numClusters = num_colors - num_empty;
-  assert(this->numClusters == (uint32_t)colortable.size());
+  int numClusters = num_colors - num_empty;
+  *numClustersPtr = numClusters;
+  
+  return;
 }
 
-std::vector<uint32_t>
+void
 quant_varpart_fast (
                     const uint32_t numPixels,
                     const uint32_t *inPixels,
                     uint32_t *tmpPixels,
                     const uint32_t numRows,
                     const uint32_t numCols,
-                    int num_colors,
+                    uint32_t *numClustersPtr,
+                    uint32_t *colortablePtr,
                     const int num_bits,
                     const int dec_factor,
                     const int max_iters,
-                    const bool allPixelsUnique)
+                    const int allPixelsUnique)
 {
   int num_points;
   
@@ -1150,6 +1116,8 @@ quant_varpart_fast (
   }
   
   num_points = numPixels;
+  
+  int num_colors = *numClustersPtr;
 
   bool inputPixelsAllocated = false;
   uint32_t *inputPixels = (uint32_t*) inPixels;
@@ -1175,91 +1143,25 @@ quant_varpart_fast (
     memcpy(inputPixels, tmpPixels, num_points * sizeof(uint32_t));
   }
   
-  vector<uint32_t> vec;
-  
   if (weightsPtr == nullptr) {
     // Uniform weight
     
     if (num_colors <= 256) {
       // Uniform weight and each cluster int fits in one byte
       
-      DivQuantCluster<true, uint8_t, true> dqCluster;
-      
-      dqCluster.numPoints = num_points;
-      dqCluster.numClusters = num_colors;
-      
-      dqCluster.inPixelsPtr = inputPixels;
-      dqCluster.tmpPixelsPtr = tmpPixels;
-      
-      dqCluster.weightsPtr = weightsPtr;
-      dqCluster.weightUniform = weightUniform;
-      
-      dqCluster.maxNumIterations = max_iters;
-      dqCluster.numBits = num_bits;
-      
-      dqCluster.cluster();
-      
-      vec = dqCluster.colortable;
+      DivQuantCluster<true, uint8_t, true>(num_points, inputPixels, tmpPixels, weightUniform, weightsPtr, num_bits, max_iters, colortablePtr, numClustersPtr);
     } else {
       // Uniform weight where each cluster fits in a word
 
-      DivQuantCluster<true, uint32_t, true> dqCluster;
-      
-      dqCluster.numPoints = num_points;
-      dqCluster.numClusters = num_colors;
-      
-      dqCluster.inPixelsPtr = inputPixels;
-      dqCluster.tmpPixelsPtr = tmpPixels;
-      
-      dqCluster.weightsPtr = weightsPtr;
-      dqCluster.weightUniform = weightUniform;
-      
-      dqCluster.maxNumIterations = max_iters;
-      dqCluster.numBits = num_bits;
-      
-      dqCluster.cluster();
-      
-      vec = dqCluster.colortable;
+      DivQuantCluster<true, uint32_t, true>(num_points, inputPixels, tmpPixels, weightUniform, weightsPtr, num_bits, max_iters, colortablePtr, numClustersPtr);
     }
   } else {
     // Non-uniform weights (num clusters unrestrained)
     
     if (num_colors <= 256) {
-      DivQuantCluster<false, uint8_t, true> dqCluster;
-      
-      dqCluster.numPoints = num_points;
-      dqCluster.numClusters = num_colors;
-      
-      dqCluster.inPixelsPtr = inputPixels;
-      dqCluster.tmpPixelsPtr = tmpPixels;
-      
-      dqCluster.weightsPtr = weightsPtr;
-      dqCluster.weightUniform = weightUniform;
-      
-      dqCluster.maxNumIterations = max_iters;
-      dqCluster.numBits = num_bits;
-      
-      dqCluster.cluster();
-      
-      vec = dqCluster.colortable;
+      DivQuantCluster<false, uint8_t, true>(num_points, inputPixels, tmpPixels, weightUniform, weightsPtr, num_bits, max_iters, colortablePtr, numClustersPtr);
     } else {
-      DivQuantCluster<false, uint32_t, true> dqCluster;
-      
-      dqCluster.numPoints = num_points;
-      dqCluster.numClusters = num_colors;
-      
-      dqCluster.inPixelsPtr = inputPixels;
-      dqCluster.tmpPixelsPtr = tmpPixels;
-      
-      dqCluster.weightsPtr = weightsPtr;
-      dqCluster.weightUniform = weightUniform;
-      
-      dqCluster.maxNumIterations = max_iters;
-      dqCluster.numBits = num_bits;
-      
-      dqCluster.cluster();
-      
-      vec = dqCluster.colortable;
+      DivQuantCluster<false, uint32_t, true>(num_points, inputPixels, tmpPixels, weightUniform, weightsPtr, num_bits, max_iters, colortablePtr, numClustersPtr);
     }
   }
   
@@ -1271,6 +1173,6 @@ quant_varpart_fast (
     delete [] inputPixels;
   }
   
-  return vec;
+  return;
 }
 
