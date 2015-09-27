@@ -257,8 +257,8 @@ map_colors_mps ( const uint32_t *inPixelsPtr, uint32_t numPixels, uint32_t *outP
   Pixel_Int *cmap;
   int up, down;
   uint32_t B, G, R, pixel;
-  double *lut_ssd_buffer;
-  double *lut_ssd;
+  int *lut_ssd_buffer;
+  int *lut_ssd;
   int size_lut_ssd;
   
   int num_colors = colormapSize;
@@ -284,7 +284,7 @@ map_colors_mps ( const uint32_t *inPixelsPtr, uint32_t numPixels, uint32_t *outP
 #endif // SEARCH_DEBUG_SORT
   
   size_lut_ssd = 2 * max_sum + 1;
-  lut_ssd_buffer = ( double * ) malloc ( size_lut_ssd * sizeof ( double ) );
+  lut_ssd_buffer = ( int * ) malloc ( size_lut_ssd * sizeof ( int ) );
   check_mem ( lut_ssd_buffer == NULL );
   
   lut_ssd = lut_ssd_buffer + max_sum;
@@ -308,7 +308,7 @@ map_colors_mps ( const uint32_t *inPixelsPtr, uint32_t numPixels, uint32_t *outP
     //    printf("lut_ssd[%d] = %0.8f\n", -ik, lut_ssd[-ik]);
     //    printf("lut_ssd[%d] = %0.8f\n", ik, lut_ssd[ik]);
     
-    lut_ssd[-ik] = lut_ssd[ik] = ( ik * ik ) / 3.0;
+    lut_ssd[-ik] = lut_ssd[ik] = (int) (( ik * ik ) / 3.0);
   }
   
   // Sort the palette by the sum of color components.
@@ -428,7 +428,7 @@ map_colors_mps ( const uint32_t *inPixelsPtr, uint32_t numPixels, uint32_t *outP
       {
         m++;
         
-        if ( ( m > ( num_colors - 1 ) ) || ( lut_ssd[sum - cmap[m].weight] > min_dist ) )
+        if ( ( m > ( num_colors - 1 ) ) || ( lut_ssd[sum - cmap[m].weight] >= min_dist ) )
         {
           // Terminate the search in DOWN direction
           down = 0;
@@ -462,7 +462,7 @@ map_colors_mps ( const uint32_t *inPixelsPtr, uint32_t numPixels, uint32_t *outP
       {
         n--;
         
-        if ( ( n < 0 ) || ( lut_ssd[sum - cmap[n].weight] > min_dist ) )
+        if ( ( n < 0 ) || ( lut_ssd[sum - cmap[n].weight] >= min_dist ) )
         {
           // Terminate the search in UP direction
           up = 0;
