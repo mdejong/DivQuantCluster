@@ -246,7 +246,6 @@ map_colors_mps ( const uint32_t *inPixelsPtr, uint32_t numPixels, uint32_t *outP
   int ik, ic;
   int index;
   int low, high;
-  int m, n;
   int dist;
   int min_dist;
   int red, green, blue;
@@ -255,7 +254,7 @@ map_colors_mps ( const uint32_t *inPixelsPtr, uint32_t numPixels, uint32_t *outP
   int max_sum = 3 * MAX_RGB;
   int *lut_init;
   Pixel_Int *cmap;
-  int up, down;
+  int up, upi, down, downi;
   uint32_t B, G, R, pixel;
   int *lut_ssd_buffer;
   int *lut_ssd;
@@ -420,73 +419,101 @@ map_colors_mps ( const uint32_t *inPixelsPtr, uint32_t numPixels, uint32_t *outP
     }
 #endif // SEARCH_DEBUG
     
-    m = n = index;
+    upi = downi = index;
     up = down = 1;
     while ( up || down )
     {
-      if ( down )
-      {
-        m++;
-        
-        if ( ( m > ( num_colors - 1 ) ) || ( lut_ssd[sum - cmap[m].weight] >= min_dist ) )
-        {
-          // Terminate the search in DOWN direction
-          down = 0;
-          
-#if defined(SEARCH_DEBUG)
-          printf("terminate down search at low index %3d\n", m);
-#endif // SEARCH_DEBUG
-        }
-        else
-        {
-          dist = L2_sqr_int ( red, green, blue,
-                             cmap[m].red, cmap[m].green, cmap[m].blue );
-          
-#if defined(SEARCH_DEBUG)
-          printf("L2 (down) at %3d from (%d %d %d) to 0x%02X%02X%02X (%d %d %d) = %d\n", m, red, green, blue, cmap[m].red, cmap[m].green, cmap[m].blue, cmap[m].red, cmap[m].green, cmap[m].blue, dist);
-#endif // SEARCH_DEBUG
-          
-          if ( dist < min_dist )
-          {
-            min_dist = dist;
-            index = m;
-            
-#if defined(SEARCH_DEBUG)
-            printf("L2 (down) new min at %d\n", index);
-#endif // SEARCH_DEBUG
-          }
-        }
-      }
-      
       if ( up )
       {
-        n--;
+        upi++;
         
-        if ( ( n < 0 ) || ( lut_ssd[sum - cmap[n].weight] >= min_dist ) )
+#if defined(DEBUG)
+        int cond = ( upi > ( num_colors - 1 ) );
+        if (!cond) {
+          int ind = sum - cmap[upi].weight;
+          int ind_from_start;
+          // ind could be positive or negative here
+          ind_from_start = max_sum + ind;
+          assert(ind_from_start >= 0);
+          assert(ind_from_start < size_lut_ssd);
+          cond = ( lut_ssd[ind] >= min_dist );
+        }
+        if ( cond )
+#else
+        if ( ( upi > ( num_colors - 1 ) ) || ( lut_ssd[sum - cmap[upi].weight] >= min_dist ) )
+#endif // DEBUG
         {
           // Terminate the search in UP direction
           up = 0;
           
 #if defined(SEARCH_DEBUG)
-          printf("terminate up search at high index %3d\n", n);
+          printf("terminate up   search at high index %3d\n", upi);
 #endif // SEARCH_DEBUG
         }
         else
         {
           dist = L2_sqr_int ( red, green, blue,
-                             cmap[n].red, cmap[n].green, cmap[n].blue );
+                             cmap[upi].red, cmap[upi].green, cmap[upi].blue );
           
 #if defined(SEARCH_DEBUG)
-          printf("L2 (up  ) at %3d from (%d %d %d) to 0x%02X%02X%02X (%d %d %d) = %d\n", n, red, green, blue, cmap[n].red, cmap[n].green, cmap[n].blue, cmap[n].red, cmap[n].green, cmap[n].blue, dist);
+          printf("L2 (up  ) at %3d from (%d %d %d) to 0x%02X%02X%02X (%d %d %d) = %d\n", upi, red, green, blue, cmap[upi].red, cmap[upi].green, cmap[upi].blue, cmap[upi].red, cmap[upi].green, cmap[upi].blue, dist);
 #endif // SEARCH_DEBUG
           
-          if ( dist < min_dist ) 
-          { 
-            min_dist = dist; 
-            index = n;
+          if ( dist < min_dist )
+          {
+            min_dist = dist;
+            index = upi;
             
 #if defined(SEARCH_DEBUG)
-            printf("L2 (up) new min at %d\n", index);
+            printf("L2 (up  ) new min at %d\n", index);
+#endif // SEARCH_DEBUG
+          }
+        }
+      }
+      
+      if ( down )
+      {
+        downi--;
+        
+#if defined(DEBUG)
+        int cond = ( downi < 0 );
+        if (!cond) {
+          int ind = sum - cmap[downi].weight;
+          int ind_from_start;
+          // ind could be positive or negative here
+          ind_from_start = max_sum + ind;
+          assert(ind_from_start >= 0);
+          assert(ind_from_start < size_lut_ssd);
+          cond = ( lut_ssd[ind] >= min_dist );
+        }
+        if ( cond )
+#else
+        if ( ( downi < 0 ) || ( lut_ssd[sum - cmap[downi].weight] >= min_dist ) )
+#endif // DEBUG
+        {
+          // Terminate the search in DOWN direction
+          down = 0;
+          
+#if defined(SEARCH_DEBUG)
+          printf("terminate down search at low  index %3d\n", downi);
+#endif // SEARCH_DEBUG
+        }
+        else
+        {
+          dist = L2_sqr_int ( red, green, blue,
+                             cmap[downi].red, cmap[downi].green, cmap[downi].blue );
+          
+#if defined(SEARCH_DEBUG)
+          printf("L2 (down) at %3d from (%d %d %d) to 0x%02X%02X%02X (%d %d %d) = %d\n", downi, red, green, blue, cmap[downi].red, cmap[downi].green, cmap[downi].blue, cmap[downi].red, cmap[downi].green, cmap[downi].blue, dist);
+#endif // SEARCH_DEBUG
+          
+          if ( dist < min_dist )
+          {
+            min_dist = dist;
+            index = downi;
+            
+#if defined(SEARCH_DEBUG)
+            printf("L2 (down) new min at %d\n", index);
 #endif // SEARCH_DEBUG
           }
         }
