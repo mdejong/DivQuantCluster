@@ -144,6 +144,7 @@ DivQuantCluster(
                 uint32_t *numClustersPtr)
 {
   int ic, ip, it;
+  int colortableOffset;
   int max_iters_m1; /* MAX_ITERS - 1 */
   int tmp_num_points; /* number of points in C */
   int old_index; /* index of C or C1 */
@@ -1028,13 +1029,14 @@ DivQuantCluster(
   /* Determine the final cluster centers */
   shift_amount = 8 - num_bits;
   num_empty = 0;
+  colortableOffset = 0;
   for ( ic = 0; ic < num_colors; ic++ )
   {
 #if defined(DEBUG)
     assert(ic >= 0 && ic < size_size);
 #endif // DEBUG
     
-    if ( 0 < size[ic] )
+    if ( size[ic] > 0 )
     {
 #if defined(DEBUG)
       assert(ic >= 0 && ic < mean_size);
@@ -1049,7 +1051,7 @@ DivQuantCluster(
       uint32_t G = ( ( uint8_t ) ( mean[ic].green + 0.5 ) ) << shift_amount; /* round */
       uint32_t B = ( ( uint8_t ) ( mean[ic].blue + 0.5 ) ) << shift_amount; /* round */
       uint32_t pixel = (R << 16) | (G << 8) | B;
-      colortablePtr[ic] = pixel;
+      colortablePtr[colortableOffset++] = pixel;
       
 #ifdef VERBOSE
       printf ( "\t%d : Rounded ( %d %d %d ) \n", ic, R, G, B);

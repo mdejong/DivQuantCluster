@@ -288,7 +288,9 @@ void process_file(PngContext *cxt)
   // Note that this method writes numClusters with a possibly smaller N in the case
   // where not enough points exist to split into N clusters.
   
-  quant_recurse(numPixels, inUniquePixels, outUniquePixels, &numClusters, outColortablePixels);
+  int allPixelsUnique = 1;
+  
+  quant_recurse(numPixels, inUniquePixels, outUniquePixels, &numClusters, outColortablePixels, allPixelsUnique);
   
   // Print absolute mean and squared mean error metrics that indicate cluster quality
   

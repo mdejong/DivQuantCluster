@@ -7,8 +7,8 @@
 extern "C" {
 #endif
     
-  void quant_recurse ( uint32_t numPixels, const uint32_t *inPixelsPtr, uint32_t *outColorTableOffsetPtr, uint32_t *numClustersPtr, uint32_t *outColortablePtr );
-
+  void quant_recurse ( uint32_t numPixels, const uint32_t *inPixelsPtr, uint32_t *outColorTableOffsetPtr, uint32_t *numClustersPtr, uint32_t *outColortablePtr, int allPixelsUnique );
+  
 #ifdef __cplusplus
 }
 #endif

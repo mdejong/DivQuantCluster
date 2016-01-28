@@ -11,20 +11,22 @@
 
 #include "quant_util.h"
 
+#include <unordered_map>
+
 using namespace std;
 
 // Each cluster is represented by an exact floating point cluster center and the variance.
 
-void quant_recurse ( uint32_t numPixels, const uint32_t *inPixelsPtr, uint32_t *outPixelsPtr, uint32_t *numClustersPtr, uint32_t *outColortablePtr )
+void quant_recurse ( uint32_t numPixels, const uint32_t *inPixelsPtr, uint32_t *outPixelsPtr, uint32_t *numClustersPtr, uint32_t *outColortablePtr, int allPixelsUnique )
 {
   const int displayTimings = 1;
+  
+  const bool dumpDedupCmap = false;
   
   clock_t t1, t2;
   long elapsed;
   
   //int num_colors = 256;
-  
-  int allPixelsUnique = 1;
   
   int max_iters = 10;
   //int max_iters = 5;
@@ -65,11 +67,74 @@ void quant_recurse ( uint32_t numPixels, const uint32_t *inPixelsPtr, uint32_t *
   
   int act_num_colors = *numClustersPtr;
   
-  // Dump cmap entries
-  
   if (displayTimings) {
     t1 = clock();
   }
+  
+  // Dump cmap entries and dedup cmap in case of repeated values that resolve to same RGB entry.
+  
+  if (dumpDedupCmap) {
+    for ( int i = 0; i < act_num_colors; i++ ) {
+      // Note that red, green, blue already converted to int at this point
+      
+      uint32_t colortablePixel = outColortablePtr[i];
+      
+      uint32_t B = colortablePixel & 0xFF;
+      uint32_t G = (colortablePixel >> 8) & 0xFF;
+      uint32_t R = (colortablePixel >> 16) & 0xFF;
+      uint32_t pixel = (R << 16) | (G << 8) | B;
+      
+      if ((1)) {
+        fprintf(stdout, "cmap[%3d] = 0x%08X = R G B ( %3d %3d %3d )\n", i, pixel, R, G, B);
+      }
+    }
+  }
+  
+  unordered_map<uint32_t, uint32_t> seen;
+  vector<uint32_t> dedupOrder;
+  dedupOrder.reserve(act_num_colors);
+
+  for ( int i = 0; i < act_num_colors; i++) {
+    uint32_t pixel = outColortablePtr[i];
+    if (seen.count(pixel) > 0) {
+      continue;
+    }
+    seen[pixel] = i;
+    dedupOrder.push_back(pixel);
+  }
+  
+  if ((int)dedupOrder.size() < act_num_colors) {
+    if (dumpDedupCmap) {
+      fprintf(stdout, "DEDUP cmap from %d to %d entries\n", act_num_colors, (int)dedupOrder.size());
+    }
+    
+    act_num_colors = (int)dedupOrder.size();
+    *numClustersPtr = act_num_colors;
+    
+    for ( int i = 0; i < act_num_colors; i++) {
+      uint32_t pixel = dedupOrder[i];
+      outColortablePtr[i] = pixel;
+    }
+  }
+  
+  if (dumpDedupCmap) {
+    for ( int i = 0; i < act_num_colors; i++ ) {
+      // Note that red, green, blue already converted to int at this point
+      
+      uint32_t colortablePixel = outColortablePtr[i];
+      
+      uint32_t B = colortablePixel & 0xFF;
+      uint32_t G = (colortablePixel >> 8) & 0xFF;
+      uint32_t R = (colortablePixel >> 16) & 0xFF;
+      uint32_t pixel = (R << 16) | (G << 8) | B;
+      
+      if ((1)) {
+        fprintf(stdout, "cmap[%3d] = 0x%08X = R G B ( %3d %3d %3d )\n", i, pixel, R, G, B);
+      }
+    }
+  }
+
+  // Map input pixels through the colortable
   
   map_colors_mps ( inPixelsPtr, numPixels, outPixelsPtr, outColortablePtr, act_num_colors );
   
@@ -77,25 +142,6 @@ void quant_recurse ( uint32_t numPixels, const uint32_t *inPixelsPtr, uint32_t *
     t2 = clock();
     elapsed = timediff(t1, t2);
     printf("map_colors_mps() elapsed: %ld ms aka %0.2f s\n", elapsed, elapsed/1000.0f);
-  }
-  
-  if ((0)) {
-  
-  for ( int i = 0; i < act_num_colors; i++ ) {
-    // Note that red, green, blue already converted to int at this point
-    
-    uint32_t colortablePixel = outPixelsPtr[i];
-
-    uint32_t B = colortablePixel & 0xFF;
-    uint32_t G = (colortablePixel >> 8) & 0xFF;
-    uint32_t R = (colortablePixel >> 16) & 0xFF;
-    uint32_t pixel = (R << 16) | (G << 8) | B;
-    
-    if ((0)) {
-      fprintf(stdout, "cmap[%3d] = 0x%08X = R G B ( %3d %3d %3d )\n", i, pixel, R, G, B);
-    }
-  }
-    
   }
   
   if ((0)) {
