@@ -7,6 +7,21 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3C4551421DF3672300F3DB95 /* adler32.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C4551281DF3672300F3DB95 /* adler32.c */; };
+		3C4551431DF3672300F3DB95 /* compress.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C4551291DF3672300F3DB95 /* compress.c */; };
+		3C4551441DF3672300F3DB95 /* crc32.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C45512A1DF3672300F3DB95 /* crc32.c */; };
+		3C4551451DF3672300F3DB95 /* deflate.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C45512C1DF3672300F3DB95 /* deflate.c */; };
+		3C4551461DF3672300F3DB95 /* gzclose.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C45512E1DF3672300F3DB95 /* gzclose.c */; };
+		3C4551471DF3672300F3DB95 /* gzlib.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C4551301DF3672300F3DB95 /* gzlib.c */; };
+		3C4551481DF3672300F3DB95 /* gzread.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C4551311DF3672300F3DB95 /* gzread.c */; };
+		3C4551491DF3672300F3DB95 /* gzwrite.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C4551321DF3672300F3DB95 /* gzwrite.c */; };
+		3C45514A1DF3672300F3DB95 /* infback.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C4551331DF3672300F3DB95 /* infback.c */; };
+		3C45514B1DF3672300F3DB95 /* inffast.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C4551341DF3672300F3DB95 /* inffast.c */; };
+		3C45514C1DF3672300F3DB95 /* inflate.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C4551371DF3672300F3DB95 /* inflate.c */; };
+		3C45514D1DF3672300F3DB95 /* inftrees.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C4551391DF3672300F3DB95 /* inftrees.c */; };
+		3C45514E1DF3672300F3DB95 /* trees.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C45513B1DF3672300F3DB95 /* trees.c */; };
+		3C45514F1DF3672300F3DB95 /* uncompr.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C45513D1DF3672300F3DB95 /* uncompr.c */; };
+		3C4551501DF3672300F3DB95 /* zutil.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C4551401DF3672300F3DB95 /* zutil.c */; };
 		3CBF1EF61BB0A7D60028625A /* png.c in Sources */ = {isa = PBXBuildFile; fileRef = 3CBF1EDE1BB0A7D60028625A /* png.c */; };
 		3CBF1EF71BB0A7D60028625A /* pngerror.c in Sources */ = {isa = PBXBuildFile; fileRef = 3CBF1EE21BB0A7D60028625A /* pngerror.c */; };
 		3CBF1EF81BB0A7D60028625A /* pngget.c in Sources */ = {isa = PBXBuildFile; fileRef = 3CBF1EE31BB0A7D60028625A /* pngget.c */; };
@@ -23,7 +38,6 @@
 		3CBF1F031BB0A7D60028625A /* pngwtran.c in Sources */ = {isa = PBXBuildFile; fileRef = 3CBF1EF21BB0A7D60028625A /* pngwtran.c */; };
 		3CBF1F041BB0A7D60028625A /* pngwutil.c in Sources */ = {isa = PBXBuildFile; fileRef = 3CBF1EF31BB0A7D60028625A /* pngwutil.c */; };
 		3CBF1F071BB0A8B20028625A /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3CBF1F061BB0A8B20028625A /* main.cpp */; };
-		3CBF1F091BB0A90E0028625A /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3CBF1F081BB0A90E0028625A /* libz.dylib */; };
 		3CBF1F121BB0ADA10028625A /* DivQuantCluster.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3CBF1F0B1BB0ADA10028625A /* DivQuantCluster.cpp */; };
 		3CBF1F131BB0ADA10028625A /* DivQuantMapColors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3CBF1F0D1BB0ADA10028625A /* DivQuantMapColors.cpp */; };
 		3CBF1F141BB0ADA10028625A /* DivQuantMisc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3CBF1F0E1BB0ADA10028625A /* DivQuantMisc.cpp */; };
@@ -50,6 +64,35 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		3C4551231DF366FC00F3DB95 /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
+		3C4551241DF366FC00F3DB95 /* pnglibconf.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pnglibconf.c; sourceTree = "<group>"; };
+		3C4551251DF366FC00F3DB95 /* pngprefix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pngprefix.h; sourceTree = "<group>"; };
+		3C4551281DF3672300F3DB95 /* adler32.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = adler32.c; sourceTree = "<group>"; };
+		3C4551291DF3672300F3DB95 /* compress.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = compress.c; sourceTree = "<group>"; };
+		3C45512A1DF3672300F3DB95 /* crc32.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = crc32.c; sourceTree = "<group>"; };
+		3C45512B1DF3672300F3DB95 /* crc32.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = crc32.h; sourceTree = "<group>"; };
+		3C45512C1DF3672300F3DB95 /* deflate.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = deflate.c; sourceTree = "<group>"; };
+		3C45512D1DF3672300F3DB95 /* deflate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = deflate.h; sourceTree = "<group>"; };
+		3C45512E1DF3672300F3DB95 /* gzclose.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = gzclose.c; sourceTree = "<group>"; };
+		3C45512F1DF3672300F3DB95 /* gzguts.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gzguts.h; sourceTree = "<group>"; };
+		3C4551301DF3672300F3DB95 /* gzlib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = gzlib.c; sourceTree = "<group>"; };
+		3C4551311DF3672300F3DB95 /* gzread.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = gzread.c; sourceTree = "<group>"; };
+		3C4551321DF3672300F3DB95 /* gzwrite.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = gzwrite.c; sourceTree = "<group>"; };
+		3C4551331DF3672300F3DB95 /* infback.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = infback.c; sourceTree = "<group>"; };
+		3C4551341DF3672300F3DB95 /* inffast.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = inffast.c; sourceTree = "<group>"; };
+		3C4551351DF3672300F3DB95 /* inffast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = inffast.h; sourceTree = "<group>"; };
+		3C4551361DF3672300F3DB95 /* inffixed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = inffixed.h; sourceTree = "<group>"; };
+		3C4551371DF3672300F3DB95 /* inflate.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = inflate.c; sourceTree = "<group>"; };
+		3C4551381DF3672300F3DB95 /* inflate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = inflate.h; sourceTree = "<group>"; };
+		3C4551391DF3672300F3DB95 /* inftrees.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = inftrees.c; sourceTree = "<group>"; };
+		3C45513A1DF3672300F3DB95 /* inftrees.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = inftrees.h; sourceTree = "<group>"; };
+		3C45513B1DF3672300F3DB95 /* trees.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = trees.c; sourceTree = "<group>"; };
+		3C45513C1DF3672300F3DB95 /* trees.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = trees.h; sourceTree = "<group>"; };
+		3C45513D1DF3672300F3DB95 /* uncompr.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = uncompr.c; sourceTree = "<group>"; };
+		3C45513E1DF3672300F3DB95 /* zconf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zconf.h; sourceTree = "<group>"; };
+		3C45513F1DF3672300F3DB95 /* zlib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zlib.h; sourceTree = "<group>"; };
+		3C4551401DF3672300F3DB95 /* zutil.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = zutil.c; sourceTree = "<group>"; };
+		3C4551411DF3672300F3DB95 /* zutil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zutil.h; sourceTree = "<group>"; };
 		3CBF1ED31BB0A6AC0028625A /* DivQuantCluster */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = DivQuantCluster; sourceTree = BUILT_PRODUCTS_DIR; };
 		3CBF1EDE1BB0A7D60028625A /* png.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = png.c; sourceTree = "<group>"; };
 		3CBF1EDF1BB0A7D60028625A /* png.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = png.h; sourceTree = "<group>"; };
@@ -76,7 +119,6 @@
 		3CBF1EF41BB0A7D60028625A /* PngContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PngContext.h; sourceTree = "<group>"; };
 		3CBF1EF51BB0A7D60028625A /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		3CBF1F061BB0A8B20028625A /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
-		3CBF1F081BB0A90E0028625A /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		3CBF1F0B1BB0ADA10028625A /* DivQuantCluster.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DivQuantCluster.cpp; sourceTree = "<group>"; };
 		3CBF1F0C1BB0ADA10028625A /* DivQuantHeader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DivQuantHeader.h; sourceTree = "<group>"; };
 		3CBF1F0D1BB0ADA10028625A /* DivQuantMapColors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DivQuantMapColors.cpp; sourceTree = "<group>"; };
@@ -95,7 +137,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3CBF1F091BB0A90E0028625A /* libz.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -109,15 +150,48 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		3C4551271DF3672300F3DB95 /* zlib */ = {
+			isa = PBXGroup;
+			children = (
+				3C4551281DF3672300F3DB95 /* adler32.c */,
+				3C4551291DF3672300F3DB95 /* compress.c */,
+				3C45512A1DF3672300F3DB95 /* crc32.c */,
+				3C45512B1DF3672300F3DB95 /* crc32.h */,
+				3C45512C1DF3672300F3DB95 /* deflate.c */,
+				3C45512D1DF3672300F3DB95 /* deflate.h */,
+				3C45512E1DF3672300F3DB95 /* gzclose.c */,
+				3C45512F1DF3672300F3DB95 /* gzguts.h */,
+				3C4551301DF3672300F3DB95 /* gzlib.c */,
+				3C4551311DF3672300F3DB95 /* gzread.c */,
+				3C4551321DF3672300F3DB95 /* gzwrite.c */,
+				3C4551331DF3672300F3DB95 /* infback.c */,
+				3C4551341DF3672300F3DB95 /* inffast.c */,
+				3C4551351DF3672300F3DB95 /* inffast.h */,
+				3C4551361DF3672300F3DB95 /* inffixed.h */,
+				3C4551371DF3672300F3DB95 /* inflate.c */,
+				3C4551381DF3672300F3DB95 /* inflate.h */,
+				3C4551391DF3672300F3DB95 /* inftrees.c */,
+				3C45513A1DF3672300F3DB95 /* inftrees.h */,
+				3C45513B1DF3672300F3DB95 /* trees.c */,
+				3C45513C1DF3672300F3DB95 /* trees.h */,
+				3C45513D1DF3672300F3DB95 /* uncompr.c */,
+				3C45513E1DF3672300F3DB95 /* zconf.h */,
+				3C45513F1DF3672300F3DB95 /* zlib.h */,
+				3C4551401DF3672300F3DB95 /* zutil.c */,
+				3C4551411DF3672300F3DB95 /* zutil.h */,
+			);
+			path = zlib;
+			sourceTree = "<group>";
+		};
 		3CBF1ECA1BB0A6AC0028625A = {
 			isa = PBXGroup;
 			children = (
-				3CBF1F081BB0A90E0028625A /* libz.dylib */,
 				3CBF1EF51BB0A7D60028625A /* README.md */,
 				3CBF1F061BB0A8B20028625A /* main.cpp */,
 				3CBF1EF41BB0A7D60028625A /* PngContext.h */,
 				3CBF1F171BB0B2710028625A /* CalcError.h */,
 				3CBF1F0A1BB0ADA10028625A /* DivQuant */,
+				3C4551271DF3672300F3DB95 /* zlib */,
 				3CBF1EDD1BB0A7D60028625A /* libpng */,
 				3CBF1F1D1BB0F0D70028625A /* DivQuantTest */,
 				3CBF1ED41BB0A6AC0028625A /* Products */,
@@ -136,6 +210,9 @@
 		3CBF1EDD1BB0A7D60028625A /* libpng */ = {
 			isa = PBXGroup;
 			children = (
+				3C4551231DF366FC00F3DB95 /* config.h */,
+				3C4551241DF366FC00F3DB95 /* pnglibconf.c */,
+				3C4551251DF366FC00F3DB95 /* pngprefix.h */,
 				3CBF1EDE1BB0A7D60028625A /* png.c */,
 				3CBF1EDF1BB0A7D60028625A /* png.h */,
 				3CBF1EE01BB0A7D60028625A /* pngconf.h */,
@@ -281,25 +358,40 @@
 			buildActionMask = 2147483647;
 			files = (
 				3CBF1F121BB0ADA10028625A /* DivQuantCluster.cpp in Sources */,
+				3C45514A1DF3672300F3DB95 /* infback.c in Sources */,
 				3CBF1F141BB0ADA10028625A /* DivQuantMisc.cpp in Sources */,
 				3CBF1F001BB0A7D60028625A /* pngtrans.c in Sources */,
 				3CBF1F021BB0A7D60028625A /* pngwrite.c in Sources */,
+				3C45514B1DF3672300F3DB95 /* inffast.c in Sources */,
+				3C45514F1DF3672300F3DB95 /* uncompr.c in Sources */,
+				3C4551471DF3672300F3DB95 /* gzlib.c in Sources */,
 				3CBF1F031BB0A7D60028625A /* pngwtran.c in Sources */,
+				3C4551451DF3672300F3DB95 /* deflate.c in Sources */,
 				3CBF1EF71BB0A7D60028625A /* pngerror.c in Sources */,
 				3CBF1EF91BB0A7D60028625A /* pngmem.c in Sources */,
+				3C45514D1DF3672300F3DB95 /* inftrees.c in Sources */,
+				3C4551431DF3672300F3DB95 /* compress.c in Sources */,
 				3CBF1F071BB0A8B20028625A /* main.cpp in Sources */,
 				3CBF1EFC1BB0A7D60028625A /* pngrio.c in Sources */,
+				3C4551461DF3672300F3DB95 /* gzclose.c in Sources */,
 				3CBF1EF61BB0A7D60028625A /* png.c in Sources */,
+				3C45514C1DF3672300F3DB95 /* inflate.c in Sources */,
 				3CBF1F011BB0A7D60028625A /* pngwio.c in Sources */,
 				3CBF1F161BB0ADA10028625A /* quant_util.cpp in Sources */,
 				3CBF1EFF1BB0A7D60028625A /* pngset.c in Sources */,
 				3CBF1F151BB0ADA10028625A /* DivQuantUni.cpp in Sources */,
 				3CBF1EFA1BB0A7D60028625A /* pngpread.c in Sources */,
 				3CBF1EF81BB0A7D60028625A /* pngget.c in Sources */,
+				3C4551441DF3672300F3DB95 /* crc32.c in Sources */,
+				3C4551501DF3672300F3DB95 /* zutil.c in Sources */,
+				3C4551481DF3672300F3DB95 /* gzread.c in Sources */,
 				3CBF1EFB1BB0A7D60028625A /* pngread.c in Sources */,
+				3C4551491DF3672300F3DB95 /* gzwrite.c in Sources */,
 				3CBF1EFE1BB0A7D60028625A /* pngrutil.c in Sources */,
 				3CBF1F041BB0A7D60028625A /* pngwutil.c in Sources */,
+				3C4551421DF3672300F3DB95 /* adler32.c in Sources */,
 				3CBF1F131BB0ADA10028625A /* DivQuantMapColors.cpp in Sources */,
+				3C45514E1DF3672300F3DB95 /* trees.c in Sources */,
 				3CBF1EFD1BB0A7D60028625A /* pngrtran.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -472,6 +564,7 @@
 				3CBF1F241BB0F0D70028625A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
