@@ -1,5 +1,5 @@
 # DivQuantCluster
-Clustering using divisive split and k-means
+Clustering using divisive split and k-means in C++
 
 My Blog Post about this software: http://www.modejong.com/blog/post17_divquant_clustering
 
