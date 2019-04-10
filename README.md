@@ -1,6 +1,8 @@
 # DivQuantCluster
 Clustering using divisive split and k-means
 
+My Blog Post about this software: http://www.modejong.com/blog/post17_divquant_clustering
+
 This clustering approach was originally implemented by M. Emre Celebi. The clustering implementation
 provides an exceptionally fast clustering algorithm in C++ that is optimized for execution speed
 and for low memory use on embedded devices.
